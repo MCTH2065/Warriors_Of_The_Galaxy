@@ -58,6 +58,12 @@ if __name__ == '__main__':
     t = time.time()
     pygame.display.flip()
     c = pygame.time.Clock()
+    routes = {
+        'down': False,
+        'up': False,
+        'left': False,
+        'right': False
+    }
     while running:
         pygame.display.flip()
         for event in pygame.event.get():
@@ -65,17 +71,34 @@ if __name__ == '__main__':
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    s.go_up()
+                    routes['up'] = True
                 elif event.key == pygame.K_DOWN:
-                    s.go_down()
+                    routes['down'] = True
                 elif event.key == pygame.K_LEFT:
-                    s.go_left()
+                    routes['left'] = True
                 elif event.key == pygame.K_RIGHT:
-                    s.go_right()
+                    routes['right'] = True
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP:
+                    routes['up'] = False
+                elif event.key == pygame.K_DOWN:
+                    routes['down'] = False
+                elif event.key == pygame.K_LEFT:
+                    routes['left'] = False
+                elif event.key == pygame.K_RIGHT:
+                    routes['right'] = False
                 elif event.key == pygame.K_g:
-                    if time.time() - t >= 0.5:
+                    if time.time() - t >= 0.25:
                         t = time.time()
                         s.fire()
+        if routes['up']:
+            s.go_up()
+        if routes['down']:
+            s.go_down()
+        if routes['left']:
+            s.go_left()
+        if routes['right']:
+            s.go_right()
         screen.fill('black')
         s.show()
         for elem in s.bullets:
