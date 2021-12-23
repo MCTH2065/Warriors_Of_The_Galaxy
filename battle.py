@@ -3,29 +3,35 @@ import time
 
 
 class Spaceship:
-    def __init__(self, x, y, size, name):
+    def __init__(self, x, y, size, name, vel):
         self.x = x
         self.y = y
         self.size = size
         self.name = name
-        #self.side = 'left'
+        self.side = False
         self.bullets = []
+        self.vel = vel
         self.show()
 
     def go_up(self):
-        self.y -= 10
+        if self.y >= self.vel:
+            self.y -= self.vel
 
     def go_down(self):
-        self.y += 10
+        if self.y <= 900 - self.vel - self.size:
+            self.y += self.vel
 
     def go_left(self):
-        self.x -= 10
+        if self.x >= self.vel:
+            self.x -= self.vel
 
     def go_right(self):
-        self.x += 10
+        if self.x <= 1200 - self.vel - self.size:
+            self.x += self.vel
 
     def fire(self):
-        self.bullets.append(Blaster(self.x + self.size // 2, self.y, 400))
+        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, 400))
+        self.side = not self.side
 
     def show(self):
         pygame.draw.rect(screen, 'white', (self.x, self.y, self.size, self.size))
@@ -49,20 +55,21 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 1200, 900
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('game')
+    pygame.display.set_caption('Warriors Of The Galaxy')
     screen.fill('black')
-    s = Spaceship(50, 50, 40, 'gogogo')
+    s = Spaceship(50, 50, 40, 'gogogo', 10)
     running = True
     count = 0
     fps = 60
     t = time.time()
     pygame.display.flip()
     c = pygame.time.Clock()
-    routes = {
+    moves = {
         'down': False,
         'up': False,
         'left': False,
-        'right': False
+        'right': False,
+        'shoot': False
     }
     while running:
         pygame.display.flip()
@@ -70,34 +77,37 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    routes['up'] = True
-                elif event.key == pygame.K_DOWN:
-                    routes['down'] = True
-                elif event.key == pygame.K_LEFT:
-                    routes['left'] = True
-                elif event.key == pygame.K_RIGHT:
-                    routes['right'] = True
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    moves['up'] = True
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    moves['down'] = True
+                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    moves['left'] = True
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    moves['right'] = True
+                elif event.key == pygame.K_f:
+                    moves['shoot'] = True
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    routes['up'] = False
-                elif event.key == pygame.K_DOWN:
-                    routes['down'] = False
-                elif event.key == pygame.K_LEFT:
-                    routes['left'] = False
-                elif event.key == pygame.K_RIGHT:
-                    routes['right'] = False
-                elif event.key == pygame.K_g:
-                    if time.time() - t >= 0.25:
-                        t = time.time()
-                        s.fire()
-        if routes['up']:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    moves['up'] = False
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    moves['down'] = False
+                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    moves['left'] = False
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    moves['right'] = False
+                elif event.key == pygame.K_f:
+                    moves['shoot'] = False
+        if time.time() - t >= 0.25 and moves['shoot']:
+            t = time.time()
+            s.fire()
+        if moves['up']:
             s.go_up()
-        if routes['down']:
+        if moves['down']:
             s.go_down()
-        if routes['left']:
+        if moves['left']:
             s.go_left()
-        if routes['right']:
+        if moves['right']:
             s.go_right()
         screen.fill('black')
         s.show()
