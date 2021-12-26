@@ -2,10 +2,19 @@ import pygame
 import time
 
 
-class Spaceship:
+class Spaceship(pygame.sprite.Sprite):
+    image = pygame.image.load("spaceships/test1.png")
+
     def __init__(self, x, y, size, name, vel):
+        super().__init__(all_sprites)
+        self.image = Spaceship.image
+        self.rect = self.image.get_rect()
+        all_sprites.add(self)
+        self.mask = pygame.mask.from_surface(self.image)
         self.x = x
         self.y = y
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.size = size
         self.name = name
         self.side = False
@@ -30,25 +39,126 @@ class Spaceship:
             self.x += self.vel
 
     def fire(self):
-        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, 400))
+        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, 400, 'white', -20))
         self.side = not self.side
 
     def show(self):
-        pygame.draw.rect(screen, 'white', (self.x, self.y, self.size, self.size))
+        self.rect.x = self.x
+        self.rect.y = self.y
 
 
-class Blaster:
-    def __init__(self, x, y, vel):
+class EnemySpaceship(pygame.sprite.Sprite):
+    image = pygame.image.load("spaceships/test2.png")
+
+    def __init__(self, x, y, size, vel):
+        super().__init__(all_sprites)
+        self.image = EnemySpaceship.image
+        self.rect = self.image.get_rect()
+        all_sprites.add(self)
+        self.mask = pygame.mask.from_surface(self.image)
         self.x = x
         self.y = y
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.dir = 'r'
+        self.x = x
+        self.y = y
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.size = size
+        self.side = False
+        self.bullets = []
+        self.vel = vel
+        self.show()
+
+    def go_up(self):
+        if self.y >= self.vel:
+            self.y -= self.vel
+
+    def go_down(self):
+        if self.y <= 900 - self.vel - self.size:
+            self.y += self.vel
+
+    def go_left(self):
+        if self.x >= self.vel:
+            self.x -= self.vel
+        else:
+            self.dir = 'r'
+
+    def go_right(self):
+        if self.x <= 1200 - self.vel - self.size:
+            self.x += self.vel
+        else:
+            self.dir = 'l'
+
+    def fire(self):
+        self.bullets.append(EnemyBlaster(self.x if not self.side else self.x + self.size - 4, self.y + self.size, 400,
+                                         'red', height + 20))
+        self.side = not self.side
+
+    def show(self):
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+
+class Blaster(pygame.sprite.Sprite):
+    image = pygame.image.load("spaceships/testbul1.png")
+
+    def __init__(self, x, y, vel, col, bord):
+        super().__init__(all_sprites)
+        self.image = Blaster.image
+        self.rect = self.image.get_rect()
+        all_sprites.add(self)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.x = x
+        self.y = y
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.bord = bord
+        self.col = col
         self.vel = vel / fps
         self.life = True
 
     def show(self):
-        pygame.draw.rect(screen, 'white', (self.x, self.y, 4, 20))
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.y -= self.vel
-        if self.y < -20:
+        if self.y < self.bord:
             self.life = False
+        if pygame.sprite.collide_mask(self, e):
+            s.bullets.remove(self)
+            all_sprites.remove(self)
+            print('enemy hit')
+
+
+class EnemyBlaster(pygame.sprite.Sprite):
+    image = pygame.image.load("spaceships/testbul2.png")
+
+    def __init__(self, x, y, vel, col, bord):
+        super().__init__(all_sprites)
+        self.image = EnemyBlaster.image
+        self.rect = self.image.get_rect()
+        all_sprites.add(self)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.x = x
+        self.y = y
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.bord = bord
+        self.col = col
+        self.vel = vel / fps
+        self.life = True
+
+    def show(self):
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.y += self.vel
+        if self.y > self.bord:
+            self.life = False
+        if pygame.sprite.collide_mask(self, s):
+            e.bullets.remove(self)
+            all_sprites.remove(self)
+            print('ally hit')
 
 
 if __name__ == '__main__':
@@ -57,11 +167,14 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Warriors Of The Galaxy')
     screen.fill('black')
-    s = Spaceship(50, 50, 40, 'gogogo', 10)
+    all_sprites = pygame.sprite.Group()
+    s = Spaceship(50, 50, 40, 'gogogo', 5)
+    e = EnemySpaceship(100, 20, 30, 5)
     running = True
     count = 0
-    fps = 60
+    fps = 75
     t = time.time()
+    e_t = time.time()
     pygame.display.flip()
     c = pygame.time.Clock()
     moves = {
@@ -109,11 +222,27 @@ if __name__ == '__main__':
             s.go_left()
         if moves['right']:
             s.go_right()
+        if e.dir == 'r':
+            e.go_right()
+        else:
+            e.go_left()
+        if time.time() - e_t >= 0.25:
+            e_t = time.time()
+            e.fire()
         screen.fill('black')
         s.show()
+        e.show()
+        all_sprites.draw(screen)
         for elem in s.bullets:
             if elem.life is False:
                 s.bullets.remove(elem)
+                all_sprites.remove(elem)
+            else:
+                elem.show()
+        for elem in e.bullets:
+            if elem.life is False:
+                e.bullets.remove(elem)
+                all_sprites.remove(elem)
             else:
                 elem.show()
         c.tick(fps)
