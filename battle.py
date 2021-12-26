@@ -1,11 +1,12 @@
 import pygame
 import time
+import json
 
 
 class Spaceship(pygame.sprite.Sprite):
     image = pygame.image.load("spaceships/test1.png")
 
-    def __init__(self, x, y, size, name, vel):
+    def __init__(self, x, y, size, name, vel, bulletvel, firerate):
         super().__init__(all_sprites)
         self.image = Spaceship.image
         self.rect = self.image.get_rect()
@@ -20,6 +21,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.side = False
         self.bullets = []
         self.vel = vel
+        self.bulletvel = bulletvel
+        self.firerate = firerate
         self.show()
 
     def go_up(self):
@@ -39,7 +42,8 @@ class Spaceship(pygame.sprite.Sprite):
             self.x += self.vel
 
     def fire(self):
-        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, 400, 'white', -20))
+        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, self.bulletvel,
+                                    'white', -20))
         self.side = not self.side
 
     def show(self):
@@ -161,18 +165,21 @@ class EnemyBlaster(pygame.sprite.Sprite):
             print('ally hit')
 
 
-if __name__ == '__main__':
+def launchgame():
+    global all_sprites, e, fps, s, height
     pygame.init()
     size = width, height = 1200, 900
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Warriors Of The Galaxy')
     screen.fill('black')
     all_sprites = pygame.sprite.Group()
-    s = Spaceship(50, 50, 40, 'gogogo', 5)
+    with open('data.json', 'r+') as file:
+        data = json.load(file)
+        s = Spaceship(50, 50, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
+                      data['upgrades']['fire rate'])
     e = EnemySpaceship(100, 20, 30, 5)
     running = True
-    count = 0
-    fps = 75
+    fps = 60
     t = time.time()
     e_t = time.time()
     pygame.display.flip()
@@ -211,7 +218,7 @@ if __name__ == '__main__':
                     moves['right'] = False
                 elif event.key == pygame.K_f:
                     moves['shoot'] = False
-        if time.time() - t >= 0.25 and moves['shoot']:
+        if time.time() - t >= s.firerate and moves['shoot']:
             t = time.time()
             s.fire()
         if moves['up']:
