@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import time
 import json
@@ -6,7 +8,7 @@ import json
 class Spaceship(pygame.sprite.Sprite):
     image = pygame.image.load("spaceships/test1.png")
 
-    def __init__(self, x, y, size, name, vel, bulletvel, firerate):
+    def __init__(self, x, y, size, name, vel, bulletvel, firerate, damage, hp):
         super().__init__(all_sprites)
         self.image = Spaceship.image
         self.rect = self.image.get_rect()
@@ -20,13 +22,16 @@ class Spaceship(pygame.sprite.Sprite):
         self.name = name
         self.side = False
         self.bullets = []
-        self.vel = vel
+        self.vel = vel // 2
+        self.hp = hp
+        self.damage = damage
         self.bulletvel = bulletvel
         self.firerate = firerate
         self.show()
 
     def go_up(self):
-        if self.y >= self.vel:
+        global height
+        if self.y >= height // 2:
             self.y -= self.vel
 
     def go_down(self):
@@ -54,7 +59,7 @@ class Spaceship(pygame.sprite.Sprite):
 class EnemySpaceship(pygame.sprite.Sprite):
     image = pygame.image.load("spaceships/test2.png")
 
-    def __init__(self, x, y, size, vel):
+    def __init__(self, x, y, size, velx, vely, damage, hp):
         super().__init__(all_sprites)
         self.image = EnemySpaceship.image
         self.rect = self.image.get_rect()
@@ -64,7 +69,6 @@ class EnemySpaceship(pygame.sprite.Sprite):
         self.y = y
         self.rect.x = self.x
         self.rect.y = self.y
-        self.dir = 'r'
         self.x = x
         self.y = y
         self.rect.x = self.x
@@ -72,37 +76,28 @@ class EnemySpaceship(pygame.sprite.Sprite):
         self.size = size
         self.side = False
         self.bullets = []
-        self.vel = vel
+        self.e_t = time.time()
+        self.velx = velx
+        self.vely = vely
+        self.hp = hp
+        self.damage = damage
         self.show()
 
-    def go_up(self):
-        if self.y >= self.vel:
-            self.y -= self.vel
-
-    def go_down(self):
-        if self.y <= 900 - self.vel - self.size:
-            self.y += self.vel
-
-    def go_left(self):
-        if self.x >= self.vel:
-            self.x -= self.vel
-        else:
-            self.dir = 'r'
-
-    def go_right(self):
-        if self.x <= 1200 - self.vel - self.size:
-            self.x += self.vel
-        else:
-            self.dir = 'l'
-
     def fire(self):
-        self.bullets.append(EnemyBlaster(self.x if not self.side else self.x + self.size - 4, self.y + self.size, 400,
-                                         'red', height + 20))
+        if self.hp > 0:
+            self.bullets.append(EnemyBlaster(self.x if not self.side else self.x + self.size - 4, self.y + self.size,
+                                             400, 'red', height + 20, self))
         self.side = not self.side
 
     def show(self):
         self.rect.x = self.x
         self.rect.y = self.y
+        self.x += self.velx
+        self.y += self.vely
+        if self.x + self.velx <= 0 or self.x + self.velx + self.size >= width:
+            self.velx = -self.velx
+        if self.y + self.vely <= 0 or self.y + self.vely + self.size >= height // 2:
+            self.vely = -self.vely
 
 
 class Blaster(pygame.sprite.Sprite):
@@ -124,22 +119,31 @@ class Blaster(pygame.sprite.Sprite):
         self.life = True
 
     def show(self):
+        global enemies, tempbullets
         self.rect.x = self.x
         self.rect.y = self.y
         self.y -= self.vel
         if self.y < self.bord:
             self.life = False
-        if pygame.sprite.collide_mask(self, e):
-            s.bullets.remove(self)
-            all_sprites.remove(self)
-            print('enemy hit')
+        for elem in enemies:
+            if pygame.sprite.collide_mask(self, elem):
+                s.bullets.remove(self)
+                all_sprites.remove(self)
+                elem.hp -= s.damage
+                if elem.hp <= 0:
+                    all_sprites.remove(elem)
+                    enemies.remove(elem)
+                    for bullet in elem.bullets:
+                        bullet.temporary = True
+                    tempbullets += elem.bullets
 
 
 class EnemyBlaster(pygame.sprite.Sprite):
     image = pygame.image.load("spaceships/testbul2.png")
 
-    def __init__(self, x, y, vel, col, bord):
+    def __init__(self, x, y, vel, col, bord, spaceship):
         super().__init__(all_sprites)
+        self.temporary = False
         self.image = EnemyBlaster.image
         self.rect = self.image.get_rect()
         all_sprites.add(self)
@@ -152,6 +156,7 @@ class EnemyBlaster(pygame.sprite.Sprite):
         self.col = col
         self.vel = vel / fps
         self.life = True
+        self.spaceship = spaceship
 
     def show(self):
         self.rect.x = self.x
@@ -160,28 +165,34 @@ class EnemyBlaster(pygame.sprite.Sprite):
         if self.y > self.bord:
             self.life = False
         if pygame.sprite.collide_mask(self, s):
-            e.bullets.remove(self)
+            if not self.temporary:
+                self.spaceship.bullets.remove(self)
+            else:
+                tempbullets.remove(self)
             all_sprites.remove(self)
-            print('ally hit')
+            s.hp -= self.spaceship.damage
 
 
 def launchgame():
-    global all_sprites, e, fps, s, height
+    global all_sprites, fps, s, height, width, enemies, tempbullets
+    tempbullets = []
     pygame.init()
     size = width, height = 1200, 900
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Warriors Of The Galaxy')
     screen.fill('black')
     all_sprites = pygame.sprite.Group()
+    enemies = list()
+    velx = random.randint(-3, 3)
+    vely = random.randint(-3, 3)
+    enemies.append(EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely, 1, 1))
     with open('data.json', 'r+') as file:
         data = json.load(file)
-        s = Spaceship(50, 50, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
-                      data['upgrades']['fire rate'])
-    e = EnemySpaceship(100, 20, 30, 5)
+        s = Spaceship(600, 700, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
+                      data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'])
     running = True
-    fps = 60
+    fps = 120
     t = time.time()
-    e_t = time.time()
     pygame.display.flip()
     c = pygame.time.Clock()
     moves = {
@@ -218,6 +229,7 @@ def launchgame():
                     moves['right'] = False
                 elif event.key == pygame.K_f:
                     moves['shoot'] = False
+        screen.fill('black')
         if time.time() - t >= s.firerate and moves['shoot']:
             t = time.time()
             s.fire()
@@ -229,29 +241,29 @@ def launchgame():
             s.go_left()
         if moves['right']:
             s.go_right()
-        if e.dir == 'r':
-            e.go_right()
-        else:
-            e.go_left()
-        if time.time() - e_t >= 0.25:
-            e_t = time.time()
-            e.fire()
-        screen.fill('black')
+        for e in enemies:
+            if time.time() - e.e_t >= 0.25:
+                e.e_t = time.time()
+                e.fire()
+            e.show()
+            for elem in e.bullets:
+                if elem.life is False:
+                    e.bullets.remove(elem)
+                    all_sprites.remove(elem)
+                else:
+                    elem.show()
         s.show()
-        e.show()
         all_sprites.draw(screen)
+        for bullet in tempbullets:
+            bullet.show()
         for elem in s.bullets:
             if elem.life is False:
                 s.bullets.remove(elem)
                 all_sprites.remove(elem)
             else:
                 elem.show()
-        for elem in e.bullets:
-            if elem.life is False:
-                e.bullets.remove(elem)
-                all_sprites.remove(elem)
-            else:
-                elem.show()
         c.tick(fps)
         pygame.display.flip()
     pygame.quit()
+
+launchgame()

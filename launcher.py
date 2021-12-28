@@ -1,9 +1,13 @@
 import json
 import sys
 
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtGui import QMovie, QPainter
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog, QMessageBox, QSlider
+from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout,
+                             QGroupBox,QMenu, QPushButton,
+                             QRadioButton, QVBoxLayout,
+                             QWidget, QSlider,QLabel)
 
 import battle
 
@@ -22,12 +26,21 @@ class Main(QDialog):
         self.bulletspeedprice.setText('Price: ' + str(self.data['prices']['bullet speed']))
         self.bulletspeedup.clicked.connect(self.upgradebulletspeed)
         self.rateupgradeprice.setText('Price: ' + str(self.data['prices']['fire rate']))
-        self.ratespeedup.clicked.connect(self.upgradespeedrate)
+        self.ratespeedup.clicked.connect(self.upgradefirerate)
         self.start.clicked.connect(self.launch)
         self.movie = QMovie("bg2.gif")
         self.movie.frameChanged.connect(self.repaint)
         self.movie.start()
+        self.setlevel.setMinimum(0)
+        self.setlevel.setMaximum(180)
+        self.setlevel.setValue(0)
+        self.setlevel.setTickPosition(QSlider.TicksBelow)
+        self.setlevel.setTickInterval(10)
+        self.setlevel.valueChanged[int].connect(self.valuechange)
         self.show()
+
+    def valuechange(self, value):
+        print(value)
 
     def paintEvent(self, event):
         currentFrame = self.movie.currentPixmap()
@@ -36,6 +49,7 @@ class Main(QDialog):
         if frameRect.intersects(event.rect()):
             painter = QPainter(self)
             painter.drawPixmap(frameRect.left(), frameRect.top(), currentFrame)
+
 
     def upgradespeed(self):
         with open('data.json', 'r+') as file:
@@ -63,7 +77,7 @@ class Main(QDialog):
             file.truncate()
         self.bulletspeedprice.setText('Price: ' + str(self.data['prices']['bullet speed']))
 
-    def upgradespeedrate(self):
+    def upgradefirerate(self):
         with open('data.json', 'r+') as file:
             if self.data['money'] < self.data['prices']['fire rate']:
                 self.showalert('No money', 'You need more money to upgrade fire rate')
@@ -77,7 +91,7 @@ class Main(QDialog):
             file.seek(0)
             json.dump(self.data, file, indent=4)
             file.truncate()
-        self.rateupgradeprice.setText('Price: ' + str(self.data['prices']['speed rate']))
+        self.rateupgradeprice.setText('Price: ' + str(self.data['prices']['fire rate']))
 
     def showalert(self, title, message):
         msg = QMessageBox()
