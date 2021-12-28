@@ -1,16 +1,18 @@
 {
-    "money": 2735,
+    "money": 1730,
     "level": "easy",
     "upgrades": {
-        "bullet speed": 400,
-        "speed": 5,
-        "fire rate": 0.5,
-        "damage": 1
+        "bullet speed": 2400,
+        "speed": 10,
+        "fire rate": 0.10999999999999968,
+        "damage": 100,
+        "hp": 1000
     },
     "prices": {
-        "bullet speed": 1,
-        "speed": 1,
-        "fire rate": 1,
-        "damage": 1
+        "bullet speed": 21,
+        "speed": 6,
+        "fire rate": 40,
+        "damage": 1,
+        "hp": 1
     }
 }
