@@ -88,7 +88,19 @@ class EnemySpaceship(pygame.sprite.Sprite):
                                              400, 'red', height + 20, self))
         self.side = not self.side
 
+    def collide(self):
+        global width
+        for elem in enemies:
+            if elem != self and pygame.sprite.collide_mask(self, elem):
+                self.velx = -self.velx
+                self.x += 2 * self.velx
+                if self.x <= 0:
+                    self.x = 5
+                elif self.x >= width - self.size:
+                    self.x = width - self.size
+
     def show(self):
+        self.collide()
         self.rect.x = self.x
         self.rect.y = self.y
         self.x += self.velx
@@ -182,16 +194,20 @@ def launchgame():
     screen.fill('black')
     all_sprites = pygame.sprite.Group()
     enemies = list()
-    velx = random.randint(-3, 3)
-    vely = random.randint(-3, 3)
-    enemies.append(EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely,
-                                  1, 1))
-    enemies.append(EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely,
-                                  1, 1))
-    enemies.append(EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely,
-                                  1, 1))
-    enemies.append(EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely,
-                                  1, 1))
+    spots = []
+    n = 5
+    for _ in range(n):
+        pos = [random.randint(10, 1190), random.randint(10, 410)]
+        while pos in spots:
+            pos = [random.randint(10, 1160), random.randint(10, 410)]
+        spots.append(pos)
+    for i in range(len(spots)):
+        speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
+        while speedx == 0 or speedy == 0:
+            speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
+        enemies.append(EnemySpaceship(spots[i][0], spots[i][1], 30, speedx, speedy,
+                                      1, 1))
+
     with open('data.json', 'r+') as file:
         data = json.load(file)
         s = Spaceship(600, 700, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
