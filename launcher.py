@@ -21,6 +21,7 @@ class Main(QDialog):
 
         with open('data.json', 'r+') as file:
             self.data = json.load(file)
+        self.level.setText('difficulty: ' + self.data['level'])
         self.speedprice.setText('Price: ' + str(self.data['prices']['speed']))
         self.speedup.clicked.connect(self.upgradespeed)
         self.bulletspeedprice.setText('Price: ' + str(self.data['prices']['bullet speed']))
@@ -40,7 +41,18 @@ class Main(QDialog):
         self.show()
 
     def valuechange(self, value):
-        print(value)
+        with open('data.json', 'r+') as file:
+            data = json.load(file)
+            if value > 120:
+                data['level'] = 'hard'
+            elif value < 60:
+                data['level'] = 'easy'
+            else:
+                data['level'] = 'medium'
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+            self.level.setText('difficulty: ' + data['level'])
 
     def paintEvent(self, event):
         currentFrame = self.movie.currentPixmap()

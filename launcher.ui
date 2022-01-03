@@ -194,9 +194,9 @@
   <widget class="QLabel" name="level">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>642</y>
-     <width>61</width>
+     <x>120</x>
+     <y>650</y>
+     <width>231</width>
      <height>21</height>
     </rect>
    </property>

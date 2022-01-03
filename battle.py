@@ -185,11 +185,26 @@ def launchgame():
     enemies = list()
     velx = random.randint(-3, 3)
     vely = random.randint(-3, 3)
-    enemies.append(EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely, 1, 1))
     with open('data.json', 'r+') as file:
         data = json.load(file)
         s = Spaceship(600, 700, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
                       data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'])
+    level = data['level']
+    if level == 'easy':
+        enemies.append(
+            EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely, 1, 1))
+        enemies.append(
+            EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely, 1, 1))
+    if level == 'medium':
+        for _ in range(4):
+            enemies.append(
+                EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely, 1,
+                               1))
+    if level == 'hard':
+        for _ in range(6):
+            enemies.append(
+                EnemySpaceship(random.randint(10, width - 20), random.randint(10, height // 2 - 20), 30, velx, vely, 1,
+                               1))
     running = True
     fps = 120
     t = time.time()
@@ -265,5 +280,3 @@ def launchgame():
         c.tick(fps)
         pygame.display.flip()
     pygame.quit()
-
-launchgame()
