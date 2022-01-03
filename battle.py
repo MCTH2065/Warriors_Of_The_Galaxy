@@ -58,7 +58,7 @@ class Spaceship(pygame.sprite.Sprite):
 class EnemySpaceship(pygame.sprite.Sprite):
     image = pygame.image.load("spaceships/test2.png")
 
-    def __init__(self, x, y, size, velx, vely, damage, hp):
+    def __init__(self, x, y, size, velx, vely, damage, hp, rew):
         super().__init__(all_sprites)
         self.image = EnemySpaceship.image
         self.rect = self.image.get_rect()
@@ -80,6 +80,7 @@ class EnemySpaceship(pygame.sprite.Sprite):
         self.vely = vely
         self.hp = hp
         self.damage = damage
+        self.reward = rew
         self.show()
 
     def fire(self):
@@ -130,7 +131,7 @@ class Blaster(pygame.sprite.Sprite):
         self.life = True
 
     def show(self):
-        global enemies, tempbullets
+        global enemies, tempbullets, money
         self.rect.x = self.x
         self.rect.y = self.y
         self.y -= self.vel
@@ -144,6 +145,7 @@ class Blaster(pygame.sprite.Sprite):
                 if elem.hp <= 0:
                     all_sprites.remove(elem)
                     enemies.remove(elem)
+                    money += elem.reward
                     for bullet in elem.bullets:
                         bullet.temporary = True
                     tempbullets += elem.bullets
@@ -185,7 +187,8 @@ class EnemyBlaster(pygame.sprite.Sprite):
 
 
 def launchgame():
-    global all_sprites, fps, s, height, width, enemies, tempbullets
+    global all_sprites, fps, s, height, width, enemies, tempbullets, money
+    money = 0
     tempbullets = []
     pygame.init()
     size = width, height = 1200, 900
@@ -195,9 +198,9 @@ def launchgame():
     all_sprites = pygame.sprite.Group()
     enemies = list()
     spots = []
-    n = 5
+    n = 4
     for _ in range(n):
-        pos = [random.randint(10, 1190), random.randint(10, 410)]
+        pos = [random.randint(10, 1160), random.randint(10, 410)]
         while pos in spots:
             pos = [random.randint(10, 1160), random.randint(10, 410)]
         spots.append(pos)
@@ -206,7 +209,7 @@ def launchgame():
         while speedx == 0 or speedy == 0:
             speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
         enemies.append(EnemySpaceship(spots[i][0], spots[i][1], 30, speedx, speedy,
-                                      1, 1))
+                                      1, 1, 50))
 
     with open('data.json', 'r+') as file:
         data = json.load(file)
@@ -224,6 +227,10 @@ def launchgame():
         'right': False,
         'shoot': False
     }
+    ammo = '40'
+    max_ammo = '/40'
+    col = (255, 255, 255)
+    r = 3
     while running:
         pygame.display.flip()
         for event in pygame.event.get():
@@ -252,9 +259,23 @@ def launchgame():
                 elif event.key == pygame.K_f:
                     moves['shoot'] = False
         screen.fill('black')
+        if time.time() - t >= s.firerate:
+            if s.firerate == r:
+                ammo = max_ammo[1:]
+                col = (255, 255, 255)
+                s.firerate = data['upgrades']['fire rate']
         if time.time() - t >= s.firerate and moves['shoot']:
             t = time.time()
             s.fire()
+            ammo = str(int(ammo) - 1)
+            if int(ammo) >= int(max_ammo[1:]) // 4:
+                col = (255, 255, 255)
+                s.firerate = data['upgrades']['fire rate']
+            else:
+                s.firerate = data['upgrades']['fire rate']
+                col = (255, 0, 0)
+            if int(ammo) == 0:
+                s.firerate = r
         if moves['up']:
             s.go_up()
         if moves['down']:
@@ -284,6 +305,14 @@ def launchgame():
                 all_sprites.remove(elem)
             else:
                 elem.show()
+        pygame.font.init()
+        font = pygame.font.SysFont('Comic Sans MS', 50)
+        txt = font.render(ammo + max_ammo, False, col)
+        screen.blit(txt, (50, 800))
+        font1 = pygame.font.SysFont('Comic Sans MS', 35)
+        txt = font1.render(str(money), False, 'yellow')
+        screen.blit(txt, (1125, 10))
+
         c.tick(fps)
         pygame.display.flip()
     pygame.quit()
