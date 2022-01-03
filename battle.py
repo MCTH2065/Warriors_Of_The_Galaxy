@@ -231,6 +231,7 @@ def launchgame():
     max_ammo = '/40'
     col = (255, 255, 255)
     r = 3
+    closed = 0
     while running:
         pygame.display.flip()
         for event in pygame.event.get():
@@ -306,10 +307,10 @@ def launchgame():
             else:
                 elem.show()
         pygame.font.init()
-        font = pygame.font.SysFont('Comic Sans MS', 50)
+        font = pygame.font.SysFont('Arial', 50)
         txt = font.render(ammo + max_ammo, False, col)
         screen.blit(txt, (50, 800))
-        font1 = pygame.font.SysFont('Comic Sans MS', 35)
+        font1 = pygame.font.SysFont('Arial', 33)
         txt = font1.render(str(money), False, 'yellow')
         screen.blit(txt, (1125, 10))
 

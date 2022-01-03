@@ -3,7 +3,7 @@ import sys
 
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QMovie, QPainter
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog, QMessageBox, QSlider
 
 import battle
 
