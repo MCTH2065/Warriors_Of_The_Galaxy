@@ -175,7 +175,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Speed rate</string>
+    <string>Fire rate</string>
    </property>
   </widget>
   <widget class="QSlider" name="setlevel">
