@@ -1,0 +1,23 @@
+{
+  "easy": {
+    "damage": 1,
+    "hp": 1,
+    "coin multiplier": 1,
+    "fire rate": 1,
+    "speed": 1
+  },
+  "medium": {
+    "damage": 2,
+    "hp": 2,
+    "coin multiplier": 1,
+    "fire rate": 0.6,
+    "speed": 3
+  },
+  "hard": {
+    "damage": 4,
+    "hp": 4,
+    "coin multiplier": 4,
+    "fire rate": 0.5,
+    "speed": 4
+  }
+}

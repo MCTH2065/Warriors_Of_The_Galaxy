@@ -18,16 +18,13 @@ class Main(QDialog):
     def __init__(self):
         super(Main, self).__init__()
         uic.loadUi('./launcher.ui', self)
-
-        with open('data.json', 'r+') as file:
-            self.data = json.load(file)
-        self.level.setText('difficulty: ' + self.data['level'])
-        self.speedprice.setText('Price: ' + str(self.data['prices']['speed']))
+        self.remake()
         self.speedup.clicked.connect(self.upgradespeed)
-        self.bulletspeedprice.setText('Price: ' + str(self.data['prices']['bullet speed']))
         self.bulletspeedup.clicked.connect(self.upgradebulletspeed)
-        self.rateupgradeprice.setText('Price: ' + str(self.data['prices']['fire rate']))
         self.ratespeedup.clicked.connect(self.upgradefirerate)
+        self.damageup.clicked.connect(self.updragedmg)
+        self.ammoup.clicked.connect(self.upgradeammo)
+        self.hpup.clicked.connect(self.upgradehp)
         self.start.clicked.connect(self.launch)
         self.movie = QMovie("bg2.gif")
         self.movie.frameChanged.connect(self.repaint)
@@ -38,7 +35,30 @@ class Main(QDialog):
         self.setlevel.setTickPosition(QSlider.TicksBelow)
         self.setlevel.setTickInterval(10)
         self.setlevel.valueChanged[int].connect(self.valuechange)
+        self.editlevel.clicked.connect(self.changelevel)
         self.show()
+
+    def remake(self):
+        with open('data.json', 'r+') as file:
+            self.data = json.load(file)
+        self.level.setText('difficulty: ' + self.data['level'])
+        self.speedprice.setText('Price: ' + str(self.data['prices']['speed']))
+        self.bulletspeedprice.setText('Price: ' + str(self.data['prices']['bullet speed']))
+        self.rateupgradeprice.setText('Price: ' + str(self.data['prices']['fire rate']))
+        self.coins.setText('Coins: ' + str(self.data['money']))
+        self.hpprice.setText('Price: ' + str(self.data['prices']['hp']))
+        self.ammoprice.setText('Price: ' + str(self.data['prices']['ammo']))
+        self.dmgprice.setText('Price: ' + str(self.data['prices']['damage']))
+        self.leveleditor.setMaximum(self.data['maxprogress'])
+        self.leveleditor.setValue(self.data['progress'])
+
+    def changelevel(self):
+        with open('data.json', 'r+') as file:
+            data = json.load(file)
+            data['progress'] = self.leveleditor.value()
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
 
     def valuechange(self, value):
         with open('data.json', 'r+') as file:
@@ -76,6 +96,20 @@ class Main(QDialog):
             file.truncate()
         self.speedprice.setText('Price: ' + str(self.data['prices']['speed']))
 
+    def upgradehp(self):
+        with open('data.json', 'r+') as file:
+            if self.data['money'] < self.data['prices']['hp']:
+                self.showalert('No money', 'You need more money to upgrade speed')
+                return
+            self.data['upgrades']['hp'] = self.data['upgrades']['hp'] + 1
+            self.data['money'] = self.data['money'] - self.data['prices']['hp']
+            self.data['prices']['hp'] = self.data['prices']['hp'] + 1
+            file.seek(0)
+            json.dump(self.data, file, indent=4)
+            file.truncate()
+        self.hpprice.setText('Price: ' + str(self.data['prices']['hp']))
+        self.remake()
+
     def upgradebulletspeed(self):
         with open('data.json', 'r+') as file:
             if self.data['money'] < self.data['prices']['bullet speed']:
@@ -88,6 +122,7 @@ class Main(QDialog):
             json.dump(self.data, file, indent=4)
             file.truncate()
         self.bulletspeedprice.setText('Price: ' + str(self.data['prices']['bullet speed']))
+        self.remake()
 
     def upgradefirerate(self):
         with open('data.json', 'r+') as file:
@@ -104,6 +139,35 @@ class Main(QDialog):
             json.dump(self.data, file, indent=4)
             file.truncate()
         self.rateupgradeprice.setText('Price: ' + str(self.data['prices']['fire rate']))
+        self.remake()
+
+    def upgradeammo(self):
+        with open('data.json', 'r+') as file:
+            if self.data['money'] < self.data['prices']['ammo']:
+                self.showalert('No money', 'You need more money to upgrade speed')
+                return
+            self.data['upgrades']['ammo'] = self.data['upgrades']['ammo'] + 5
+            self.data['money'] = self.data['money'] - self.data['prices']['ammo']
+            self.data['prices']['ammo'] = self.data['prices']['ammo'] + 1
+            file.seek(0)
+            json.dump(self.data, file, indent=4)
+            file.truncate()
+        self.ammoprice.setText('Price: ' + str(self.data['prices']['ammo']))
+        self.remake()
+
+    def updragedmg(self):
+        with open('data.json', 'r+') as file:
+            if self.data['money'] < self.data['prices']['damage']:
+                self.showalert('No money', 'You need more money to upgrade speed')
+                return
+            self.data['upgrades']['damage'] = self.data['upgrades']['damage'] + 5
+            self.data['money'] = self.data['money'] - self.data['prices']['damage']
+            self.data['prices']['damage'] = self.data['prices']['damage'] + 1
+            file.seek(0)
+            json.dump(self.data, file, indent=4)
+            file.truncate()
+        self.dmgprice.setText('Price: ' + str(self.data['prices']['damage']))
+        self.remake()
 
     def showalert(self, title, message):
         msg = QMessageBox()
@@ -114,8 +178,10 @@ class Main(QDialog):
         msg.exec_()
 
     def launch(self):
-        self.close()
+        self.hide()
         battle.launchgame()
+        self.show()
+        self.remake()
 
 
 if __name__ == '__main__':
