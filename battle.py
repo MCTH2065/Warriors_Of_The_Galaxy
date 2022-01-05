@@ -1,15 +1,14 @@
-import random
-import pygame
-import time
 import json
+import random
+import time
+
+import pygame
 
 
 class Spaceship(pygame.sprite.Sprite):
-    image = pygame.image.load("spaceships/test1.png")
-
-    def __init__(self, x, y, size, name, vel, bulletvel, firerate, damage, hp):
+    def __init__(self, x, y, name, vel, bulletvel, firerate, damage, hp, img):
         super().__init__(all_sprites)
-        self.image = Spaceship.image
+        self.image = pygame.image.load(img)
         self.rect = self.image.get_rect()
         all_sprites.add(self)
         self.mask = pygame.mask.from_surface(self.image)
@@ -17,7 +16,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.y = y
         self.rect.x = self.x
         self.rect.y = self.y
-        self.size = size
+        self.xsize = self.image.get_width()
+        self.ysize = self.image.get_height()
         self.name = name
         self.side = False
         self.bullets = []
@@ -34,7 +34,7 @@ class Spaceship(pygame.sprite.Sprite):
             self.y -= self.vel
 
     def go_down(self):
-        if self.y <= 900 - self.vel - self.size:
+        if self.y <= 900 - self.vel - self.ysize:
             self.y += self.vel
 
     def go_left(self):
@@ -42,12 +42,12 @@ class Spaceship(pygame.sprite.Sprite):
             self.x -= self.vel
 
     def go_right(self):
-        if self.x <= 1200 - self.vel - self.size:
+        if self.x <= 1200 - self.vel - self.xsize:
             self.x += self.vel
 
     def fire(self):
-        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, self.bulletvel,
-                                    'white', -20))
+        self.bullets.append(Blaster(self.x if not self.side else self.x + self.xsize - 4, self.y, self.bulletvel,
+                                    'white', -20, "spaceships/testbul1.png"))
         self.side = not self.side
 
     def show(self):
@@ -56,11 +56,9 @@ class Spaceship(pygame.sprite.Sprite):
 
 
 class EnemySpaceship(pygame.sprite.Sprite):
-    image = pygame.image.load("spaceships/test2.png")
-
-    def __init__(self, x, y, size, velx, vely, damage, hp, rew):
+    def __init__(self, x, y, velx, vely, damage, hp, rew, image):
         super().__init__(all_sprites)
-        self.image = EnemySpaceship.image
+        self.image = pygame.image.load(image)
         self.rect = self.image.get_rect()
         all_sprites.add(self)
         self.mask = pygame.mask.from_surface(self.image)
@@ -72,10 +70,12 @@ class EnemySpaceship(pygame.sprite.Sprite):
         self.y = y
         self.rect.x = self.x
         self.rect.y = self.y
-        self.size = size
+        self.xsize = self.image.get_width()
+        self.ysize = self.image.get_height()
         self.side = False
         self.bullets = []
         self.e_t = time.time()
+        self.r_t = 0.35
         self.velx = velx
         self.vely = vely
         self.hp = hp
@@ -85,20 +85,28 @@ class EnemySpaceship(pygame.sprite.Sprite):
 
     def fire(self):
         if self.hp > 0:
-            self.bullets.append(EnemyBlaster(self.x if not self.side else self.x + self.size - 4, self.y + self.size,
-                                             400, 'red', height + 20, self))
+            self.bullets.append(EnemyBlaster(self.x if not self.side else self.x + self.xsize - 4, self.y + self.ysize,
+                                             400, height + 20, self, "spaceships/testbul2.png"))
         self.side = not self.side
 
     def collide(self):
-        global width
+        global width, boss, tempbullets
         for elem in enemies:
             if elem != self and pygame.sprite.collide_mask(self, elem):
-                self.velx = -self.velx
-                self.x += 2 * self.velx
-                if self.x <= 0:
-                    self.x = 5
-                elif self.x >= width - self.size:
-                    self.x = width - self.size
+                if elem == boss:
+                    all_sprites.remove(self)
+                    enemies.remove(self)
+                    for bullet in self.bullets:
+                        bullet.temporary = True
+                    tempbullets += self.bullets
+                    boss.spawn(1)
+                else:
+                    self.velx = -self.velx
+                    self.x += 2 * self.velx
+                    if self.x <= 0:
+                        self.x = 5
+                    elif self.x >= width - self.xsize:
+                        self.x = width - self.xsize
 
     def show(self):
         self.collide()
@@ -106,18 +114,95 @@ class EnemySpaceship(pygame.sprite.Sprite):
         self.rect.y = self.y
         self.x += self.velx
         self.y += self.vely
-        if self.x + self.velx <= 0 or self.x + self.velx + self.size >= width:
+        if self.x + self.velx <= 0 or self.x + self.velx + self.xsize >= width:
             self.velx = -self.velx
-        if self.y + self.vely <= 0 or self.y + self.vely + self.size >= height // 2:
+        if self.y + self.vely <= 0 or self.y + self.vely + self.ysize >= height // 2:
             self.vely = -self.vely
 
 
-class Blaster(pygame.sprite.Sprite):
-    image = pygame.image.load("spaceships/testbul1.png")
-
-    def __init__(self, x, y, vel, col, bord):
+class Boss(pygame.sprite.Sprite):
+    def __init__(self, damage, hp, rew, img, boss_type):
         super().__init__(all_sprites)
-        self.image = Blaster.image
+        self.image = pygame.image.load(img)
+        self.rect = self.image.get_rect()
+        all_sprites.add(self)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.pos = 1
+        self.places = [(200, 20), (550, 20), (900, 20)]
+        self.x, self.y = self.places[self.pos][0], self.places[self.pos][1]
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.xsize = self.image.get_width()
+        self.ysize = self.image.get_height()
+        self.side = False
+        self.bullets = []
+        self.e_t = time.time()
+        self.r_t = 0.45
+        self.vuln_time = time.time()
+        self.hp = hp
+        self.maxhp = hp
+        self.brkarm = False
+        self.isvuln = False
+        self.damage = damage
+        self.reward = rew
+        self.boss_type = boss_type
+
+    def teleport(self):
+        global enemies, n
+        if len(enemies) == 1 and self.brkarm is False:
+            self.brkarm = True
+            self.isvuln = True
+            self.vuln_time = time.time()
+        if time.time() - self.vuln_time >= 5 and self.brkarm is True:
+            self.isvuln = False
+            self.brkarm = False
+            self.spawn(n)
+            if self.pos == 1:
+                self.pos = 2
+            elif self.pos == 2:
+                self.pos = 0
+            else:
+                self.pos = 1
+            self.x, self.y = self.places[self.pos][0], self.places[self.pos][1]
+            self.rect.x = self.x
+            self.rect.y = self.y
+        elif self.isvuln is True:
+            print(self.hp)
+
+    def fire(self):
+        if self.hp > 0:
+            self.bullets.append(EnemyBlaster(self.x + self.xsize // 4 if not self.side
+                                             else self.x + 3 * (self.xsize // 4), self.y + self.ysize,
+                                             400, height + 20, self, "spaceships/testbul3.png"))
+        self.side = not self.side
+
+    def spawn(self, n):
+        spots = []
+        for _ in range(n):
+            pos = [random.randint(10, 1160), random.randint(10, 410)]
+            while pos in spots or (self.x <= pos[0] <= self.x + self.xsize and self.y <= pos[1] <= self.y + self.ysize):
+                pos = [random.randint(10, 1160), random.randint(10, 410)]
+            spots.append(pos)
+        for i in range(len(spots)):
+            speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
+            while speedx == 0 or speedy == 0:
+                speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
+            enemies.append(EnemySpaceship(spots[i][0], spots[i][1], speedx, speedy,
+                                          1, 1, 50, "spaceships/test2.png"))
+
+    def show(self):
+        global screen
+        self.teleport()
+        pygame.draw.rect(screen, 'gray', (300, 10, 600, 5))
+        pygame.draw.rect(screen, 'red', (300, 10, (self.hp / self.maxhp) * 600, 5))
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+
+class Blaster(pygame.sprite.Sprite):
+    def __init__(self, x, y, vel, col, bord, img):
+        super().__init__(all_sprites)
+        self.image = pygame.image.load(img)
         self.rect = self.image.get_rect()
         all_sprites.add(self)
         self.mask = pygame.mask.from_surface(self.image)
@@ -131,7 +216,7 @@ class Blaster(pygame.sprite.Sprite):
         self.life = True
 
     def show(self):
-        global enemies, tempbullets, money
+        global enemies, tempbullets, money, boss
         self.rect.x = self.x
         self.rect.y = self.y
         self.y -= self.vel
@@ -141,7 +226,11 @@ class Blaster(pygame.sprite.Sprite):
             if pygame.sprite.collide_mask(self, elem):
                 s.bullets.remove(self)
                 all_sprites.remove(self)
-                elem.hp -= s.damage
+                if elem != boss:
+                    elem.hp -= s.damage
+                else:
+                    if elem.isvuln is True:
+                        elem.hp -= s.damage
                 if elem.hp <= 0:
                     all_sprites.remove(elem)
                     enemies.remove(elem)
@@ -152,12 +241,10 @@ class Blaster(pygame.sprite.Sprite):
 
 
 class EnemyBlaster(pygame.sprite.Sprite):
-    image = pygame.image.load("spaceships/testbul2.png")
-
-    def __init__(self, x, y, vel, col, bord, spaceship):
+    def __init__(self, x, y, vel, bord, spaceship, img):
         super().__init__(all_sprites)
         self.temporary = False
-        self.image = EnemyBlaster.image
+        self.image = pygame.image.load(img)
         self.rect = self.image.get_rect()
         all_sprites.add(self)
         self.mask = pygame.mask.from_surface(self.image)
@@ -166,7 +253,6 @@ class EnemyBlaster(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
         self.bord = bord
-        self.col = col
         self.vel = vel / fps
         self.life = True
         self.spaceship = spaceship
@@ -185,9 +271,8 @@ class EnemyBlaster(pygame.sprite.Sprite):
             all_sprites.remove(self)
             s.hp -= self.spaceship.damage
 
-
 def launchgame():
-    global all_sprites, fps, s, height, width, enemies, tempbullets, money
+    global all_sprites, fps, s, height, width, enemies, tempbullets, money, n, boss, screen
     money = 0
     tempbullets = []
     pygame.init()
@@ -198,7 +283,18 @@ def launchgame():
     all_sprites = pygame.sprite.Group()
     enemies = list()
     spots = []
-    n = 4
+    with open('data.json', 'r+') as file:
+        data = json.load(file)
+        s = Spaceship(600, 700, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
+                      data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'],
+                      'spaceships/test1.png')
+    level = data['level']
+    if level == 'easy':
+        n = 2
+    elif level == 'medium':
+        n = 4
+    else:
+        n = 6
     for _ in range(n):
         pos = [random.randint(10, 1160), random.randint(10, 410)]
         while pos in spots:
@@ -208,13 +304,10 @@ def launchgame():
         speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
         while speedx == 0 or speedy == 0:
             speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
-        enemies.append(EnemySpaceship(spots[i][0], spots[i][1], 30, speedx, speedy,
-                                      1, 1, 50))
-
-    with open('data.json', 'r+') as file:
-        data = json.load(file)
-        s = Spaceship(600, 700, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
-                      data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'])
+        enemies.append(EnemySpaceship(spots[i][0], spots[i][1], speedx, speedy,
+                                      1, 1, 50, "spaceships/test2.png"))
+    boss = Boss(500, 10000, 500, "spaceships/test3.png", 'first')
+    enemies.append(boss)
     running = True
     fps = 120
     t = time.time()
@@ -235,8 +328,15 @@ def launchgame():
     while running:
         pygame.display.flip()
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+            if event.type == pygame.QUIT or len(enemies) == 0:
+                if closed == 0:
+                    with open('data.json', 'r+') as file:
+                        data['money'] = data['money'] + money
+                        file.seek(0)
+                        json.dump(data, file, indent=4)
+                        file.truncate()
+                    running = False
+                    closed += 1
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
                     moves['up'] = True
@@ -286,7 +386,7 @@ def launchgame():
         if moves['right']:
             s.go_right()
         for e in enemies:
-            if time.time() - e.e_t >= 0.25:
+            if time.time() - e.e_t >= e.r_t:
                 e.e_t = time.time()
                 e.fire()
             e.show()
