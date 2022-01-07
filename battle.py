@@ -94,12 +94,7 @@ class EnemySpaceship(pygame.sprite.Sprite):
         for elem in enemies:
             if elem != self and pygame.sprite.collide_mask(self, elem):
                 if elem == boss:
-                    all_sprites.remove(self)
-                    enemies.remove(self)
-                    for bullet in self.bullets:
-                        bullet.temporary = True
-                    tempbullets += self.bullets
-                    boss.spawn(1)
+                    pass
                 else:
                     self.velx = -self.velx
                     self.x += 2 * self.velx
@@ -137,7 +132,7 @@ class Boss(pygame.sprite.Sprite):
         self.side = False
         self.bullets = []
         self.e_t = time.time()
-        self.r_t = 0.45
+        self.r_t = 0.6
         self.vuln_time = time.time()
         self.hp = hp
         self.maxhp = hp
@@ -148,7 +143,7 @@ class Boss(pygame.sprite.Sprite):
         self.boss_type = boss_type
 
     def teleport(self):
-        global enemies, n
+        global enemies, n, all_sprites
         if len(enemies) == 1 and self.brkarm is False:
             self.brkarm = True
             self.isvuln = True
@@ -156,7 +151,7 @@ class Boss(pygame.sprite.Sprite):
         if time.time() - self.vuln_time >= 5 and self.brkarm is True:
             self.isvuln = False
             self.brkarm = False
-            self.spawn(n)
+            spawn(n)
             if self.pos == 1:
                 self.pos = 2
             elif self.pos == 2:
@@ -166,8 +161,11 @@ class Boss(pygame.sprite.Sprite):
             self.x, self.y = self.places[self.pos][0], self.places[self.pos][1]
             self.rect.x = self.x
             self.rect.y = self.y
+            all_sprites.remove(self)
+            all_sprites.add(self)
+
         elif self.isvuln is True:
-            print(self.hp)
+            pass
 
     def fire(self):
         if self.hp > 0:
@@ -175,20 +173,6 @@ class Boss(pygame.sprite.Sprite):
                                              else self.x + 3 * (self.xsize // 4), self.y + self.ysize,
                                              400, height + 20, self, "spaceships/testbul3.png"))
         self.side = not self.side
-
-    def spawn(self, n):
-        spots = []
-        for _ in range(n):
-            pos = [random.randint(10, 1160), random.randint(10, 410)]
-            while pos in spots or (self.x <= pos[0] <= self.x + self.xsize and self.y <= pos[1] <= self.y + self.ysize):
-                pos = [random.randint(10, 1160), random.randint(10, 410)]
-            spots.append(pos)
-        for i in range(len(spots)):
-            speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
-            while speedx == 0 or speedy == 0:
-                speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
-            enemies.append(EnemySpaceship(spots[i][0], spots[i][1], speedx, speedy,
-                                          1, 1, 50, "spaceships/test2.png"))
 
     def show(self):
         global screen
@@ -271,18 +255,33 @@ class EnemyBlaster(pygame.sprite.Sprite):
             all_sprites.remove(self)
             s.hp -= self.spaceship.damage
 
+
+def spawn(n):
+    global enemies, boss, all_sprites
+    spots = []
+    for _ in range(n):
+        pos = [random.randint(10, 1160), random.randint(10, 410)]
+        while pos in spots:
+            pos = [random.randint(10, 1160), random.randint(10, 410)]
+        spots.append(pos)
+    for i in range(len(spots)):
+        speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
+        while speedx == 0 or speedy == 0:
+            speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
+        enemies.append(EnemySpaceship(spots[i][0], spots[i][1], speedx, speedy,
+                                      1, 1, 50, "spaceships/test2.png"))
+
 def launchgame():
-    global all_sprites, fps, s, height, width, enemies, tempbullets, money, n, boss, screen
+    global all_sprites, fps, s, height, width, enemies, tempbullets, money, n, boss, screen, all_sprites
     money = 0
+    enemies = list()
     tempbullets = []
+    all_sprites = pygame.sprite.Group()
     pygame.init()
     size = width, height = 1200, 900
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Warriors Of The Galaxy')
     screen.fill('black')
-    all_sprites = pygame.sprite.Group()
-    enemies = list()
-    spots = []
     with open('data.json', 'r+') as file:
         data = json.load(file)
         s = Spaceship(600, 700, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
@@ -295,19 +294,8 @@ def launchgame():
         n = 4
     else:
         n = 6
-    for _ in range(n):
-        pos = [random.randint(10, 1160), random.randint(10, 410)]
-        while pos in spots:
-            pos = [random.randint(10, 1160), random.randint(10, 410)]
-        spots.append(pos)
-    for i in range(len(spots)):
-        speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
-        while speedx == 0 or speedy == 0:
-            speedx, speedy = random.randint(-3, 3), random.randint(-3, 3)
-        enemies.append(EnemySpaceship(spots[i][0], spots[i][1], speedx, speedy,
-                                      1, 1, 50, "spaceships/test2.png"))
-    boss = Boss(500, 10000, 500, "spaceships/test3.png", 'first')
-    enemies.append(boss)
+    waves = 4
+    current_wave = 1
     running = True
     fps = 120
     t = time.time()
@@ -325,10 +313,34 @@ def launchgame():
     col = (255, 255, 255)
     r = 3
     closed = 0
+    boss = 0
+    wave_cleared = False
+    reset_time = time.time()
+    stop = False
     while running:
         pygame.display.flip()
+        if len(enemies) == 0:
+            if waves == current_wave:
+                stop = True
+            else:
+                if wave_cleared is False:
+                    wave_cleared = True
+                    reset_time = time.time()
+                if wave_cleared and time.time() - reset_time >= 2:
+                    if current_wave == 1:
+                        spawn(n // 2)
+                        current_wave += 1
+                    elif current_wave == 2:
+                        spawn(n)
+                        current_wave += 1
+                    else:
+                        spawn(n + 1)
+                        boss = Boss(500, 10000, 500, "spaceships/test3.png", 'first')
+                        enemies.append(boss)
+                        current_wave += 1
+                    wave_cleared = False
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or len(enemies) == 0:
+            if event.type == pygame.QUIT or stop:
                 if closed == 0:
                     with open('data.json', 'r+') as file:
                         data['money'] = data['money'] + money
@@ -413,7 +425,6 @@ def launchgame():
         font1 = pygame.font.SysFont('Arial', 33)
         txt = font1.render(str(money), False, 'yellow')
         screen.blit(txt, (1125, 10))
-
         c.tick(fps)
         pygame.display.flip()
     pygame.quit()
