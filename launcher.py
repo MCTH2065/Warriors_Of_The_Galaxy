@@ -5,9 +5,9 @@ from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtGui import QMovie, QPainter
 from PyQt5.QtWidgets import QDialog, QMessageBox, QSlider
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout,
-                             QGroupBox,QMenu, QPushButton,
+                             QGroupBox, QMenu, QPushButton,
                              QRadioButton, QVBoxLayout,
-                             QWidget, QSlider,QLabel)
+                             QWidget, QSlider, QLabel)
 
 import battle
 
@@ -81,7 +81,6 @@ class Main(QDialog):
         if frameRect.intersects(event.rect()):
             painter = QPainter(self)
             painter.drawPixmap(frameRect.left(), frameRect.top(), currentFrame)
-
 
     def upgradespeed(self):
         with open('data.json', 'r+') as file:

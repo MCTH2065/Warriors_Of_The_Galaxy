@@ -2,6 +2,7 @@ import random
 import pygame
 import time
 import json
+import ast
 
 
 class Spaceship(pygame.sprite.Sprite):
@@ -205,8 +206,8 @@ def launchgame():
                       data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'])
         ammo = str(data['upgrades']['ammo'])
         max_ammo = '/' + str(data['upgrades']['ammo'])
-        with open('enemies.json', 'r+') as e:
-            ene = json.load(e)
+        with open('enemies.txt', 'r+') as e:
+            ene = ast.literal_eval(e.read())
             enemy_type = ene[data["level"]]
     for _ in range(data['progress']):
         pos = [random.randint(10, 1160), random.randint(10, 410)]
@@ -214,9 +215,10 @@ def launchgame():
             pos = [random.randint(10, 1160), random.randint(10, 410)]
         spots.append(pos)
     for i in range(len(spots)):
-        speedx, speedy = random.randint(-enemy_type["speed"], enemy_type["speed"]), random.randint(-enemy_type["speed"], enemy_type["speed"])
+        speedx, speedy = random.randint(-enemy_type["speed"], enemy_type["speed"]), random.randint(-enemy_type["speed"],
+                                                                                                   enemy_type["speed"])
         enemies.append(EnemySpaceship(spots[i][0], spots[i][1], 30, speedx, speedy,
-                                    data['progress'] // 2 * enemy_type['damage'] + 1,
+                                      data['progress'] // 2 * enemy_type['damage'] + 1,
                                       data['progress'] // 2 * enemy_type['hp'] + 1,
                                       data['progress'] * enemy_type['coin multiplier'],
                                       enemy_type['fire rate']))
@@ -331,3 +333,6 @@ def launchgame():
         c.tick(fps)
         pygame.display.flip()
     pygame.quit()
+
+
+launchgame()

@@ -1,8 +1,8 @@
 {
-    "progress": 3,
-    "maxprogress": 3,
-    "money": 6,
-    "level": "hard",
+    "progress": 1,
+    "maxprogress": 1,
+    "money": 1,
+    "level": "easy",
     "upgrades": {
         "bullet speed": 400,
         "speed": 10,

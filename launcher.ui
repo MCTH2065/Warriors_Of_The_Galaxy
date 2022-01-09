@@ -45,7 +45,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>50</x>
      <y>120</y>
      <width>71</width>
      <height>31</height>
@@ -58,7 +58,7 @@
   <widget class="QPushButton" name="speedup">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>200</x>
      <y>120</y>
      <width>91</width>
      <height>41</height>
@@ -71,7 +71,7 @@
   <widget class="QLabel" name="speedprice">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>400</x>
      <y>120</y>
      <width>101</width>
      <height>31</height>
@@ -86,7 +86,7 @@
     <rect>
      <x>50</x>
      <y>230</y>
-     <width>131</width>
+     <width>121</width>
      <height>31</height>
     </rect>
    </property>
@@ -110,7 +110,7 @@
   <widget class="QLabel" name="bulletspeedprice">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>400</x>
      <y>230</y>
      <width>101</width>
      <height>31</height>
@@ -123,7 +123,7 @@
   <widget class="QPushButton" name="start">
    <property name="geometry">
     <rect>
-     <x>810</x>
+     <x>570</x>
      <y>760</y>
      <width>131</width>
      <height>71</height>
@@ -142,7 +142,7 @@
   <widget class="QLabel" name="rateupgradeprice">
    <property name="geometry">
     <rect>
-     <x>270</x>
+     <x>400</x>
      <y>370</y>
      <width>101</width>
      <height>31</height>
@@ -155,7 +155,7 @@
   <widget class="QPushButton" name="ratespeedup">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>200</x>
      <y>360</y>
      <width>91</width>
      <height>41</height>
@@ -181,8 +181,8 @@
   <widget class="QSlider" name="setlevel">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>830</y>
+     <x>720</x>
+     <y>560</y>
      <width>160</width>
      <height>22</height>
     </rect>
@@ -194,8 +194,8 @@
   <widget class="QLabel" name="level">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>770</y>
+     <x>700</x>
+     <y>500</y>
      <width>231</width>
      <height>21</height>
     </rect>
@@ -209,7 +209,7 @@
     <rect>
      <x>680</x>
      <y>20</y>
-     <width>221</width>
+     <width>321</width>
      <height>61</height>
     </rect>
    </property>
@@ -225,7 +225,7 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>50</x>
      <y>450</y>
      <width>91</width>
      <height>31</height>
@@ -243,7 +243,7 @@
   <widget class="QPushButton" name="damageup">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>200</x>
      <y>450</y>
      <width>91</width>
      <height>41</height>
@@ -261,7 +261,7 @@
   <widget class="QLabel" name="dmgprice">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>400</x>
      <y>460</y>
      <width>101</width>
      <height>31</height>
@@ -279,7 +279,7 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>50</x>
      <y>560</y>
      <width>91</width>
      <height>31</height>
@@ -297,7 +297,7 @@
   <widget class="QPushButton" name="ammoup">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>200</x>
      <y>560</y>
      <width>91</width>
      <height>41</height>
@@ -315,7 +315,7 @@
   <widget class="QLabel" name="ammoprice">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>400</x>
      <y>570</y>
      <width>101</width>
      <height>31</height>
@@ -333,7 +333,7 @@
   <widget class="QPushButton" name="hpup">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>200</x>
      <y>660</y>
      <width>91</width>
      <height>41</height>
@@ -351,7 +351,7 @@
   <widget class="QLabel" name="hpprice">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>400</x>
      <y>670</y>
      <width>101</width>
      <height>31</height>
@@ -369,7 +369,7 @@
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>50</x>
      <y>660</y>
      <width>91</width>
      <height>31</height>
@@ -387,8 +387,8 @@
   <widget class="QSpinBox" name="leveleditor">
    <property name="geometry">
     <rect>
-     <x>671</x>
-     <y>360</y>
+     <x>811</x>
+     <y>200</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -408,8 +408,8 @@
   <widget class="QPushButton" name="editlevel">
    <property name="geometry">
     <rect>
-     <x>670</x>
-     <y>400</y>
+     <x>810</x>
+     <y>240</y>
      <width>111</width>
      <height>51</height>
     </rect>
@@ -426,8 +426,8 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>670</x>
-     <y>310</y>
+     <x>810</x>
+     <y>150</y>
      <width>131</width>
      <height>31</height>
     </rect>
@@ -439,6 +439,24 @@
    </property>
    <property name="text">
     <string>Change Level</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>440</y>
+     <width>151</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Set difficulty</string>
    </property>
   </widget>
  </widget>
