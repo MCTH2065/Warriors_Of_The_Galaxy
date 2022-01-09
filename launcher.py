@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout,
                              QWidget, QSlider, QLabel)
 
 import battle
+import game_over
 
 
 class Main(QDialog):

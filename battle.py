@@ -4,6 +4,8 @@ import time
 import json
 import ast
 
+import game_over
+
 
 class Spaceship(pygame.sprite.Sprite):
     image = pygame.image.load("spaceships/test1.png")
@@ -251,6 +253,7 @@ def launchgame():
                 json.dump(data, file, indent=4)
                 file.truncate()
             running = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -333,6 +336,4 @@ def launchgame():
         c.tick(fps)
         pygame.display.flip()
     pygame.quit()
-
-
-launchgame()
+    game_over.gameover()
