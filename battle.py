@@ -284,6 +284,7 @@ def spawn(n, enemy_type):
     global enemies, boss, all_sprites
     spots = []
     for _ in range(n):
+
         pos = [random.randint(10, 1160), random.randint(10, 410)]
         while pos in spots:
             pos = [random.randint(10, 1160), random.randint(10, 410)]
