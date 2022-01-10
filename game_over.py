@@ -60,11 +60,11 @@ def gameover(scr, islose):
                                           ))
         s += 1
         screen.fill((0, 0, 0))
-        for i in particles:
-            i.show()
-            i.move()
-            for j in particles:
-                connect(i, j)
+        for i, particle in enumerate(particles):
+            particle.show()
+            particle.move()
+            for j in range(i, len(particles)):
+                connect(particle, particles[j])
         font = pygame.font.Font('./fonts/Blox2.ttf', 200)
         game_over = font.render('Game Over', False, 'red' if islose else 'green')
         font = pygame.font.Font('./fonts/Blox2.ttf', 50)
