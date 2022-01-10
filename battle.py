@@ -1,3 +1,4 @@
+import os
 import random
 import pygame
 import time
@@ -8,7 +9,7 @@ import game_over
 
 
 class Spaceship(pygame.sprite.Sprite):
-    image = pygame.image.load("spaceships/test1.png")
+    image = pygame.image.load("spaceships/spaceship.png")
 
     def __init__(self, x, y, size, name, vel, bulletvel, firerate, damage, hp):
         super().__init__(all_sprites)
@@ -49,8 +50,9 @@ class Spaceship(pygame.sprite.Sprite):
             self.x += self.vel
 
     def fire(self):
-        self.bullets.append(Blaster(self.x if not self.side else self.x + self.size - 4, self.y, self.bulletvel,
-                                    'white', -20))
+        self.bullets.append(
+            Blaster(self.x if not self.side else self.x + self.size - 4, self.y + self.size // 2, self.bulletvel,
+                    'white', -20))
         self.side = not self.side
 
     def show(self):
@@ -190,8 +192,45 @@ class EnemyBlaster(pygame.sprite.Sprite):
             s.hp -= self.spaceship.damage
 
 
+
+# class Planet(pygame.sprite.Sprite):
+#     def __init__(self, x, y, image):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.image = pygame.image.load(f"backgrounds/{image}")
+#         self.rect = self.image.get_rect()
+#         self.rect.bottom = y
+#         self.rect.centerx = x
+#         all_sprites.add(self)
+
+
+# class Star(pygame.sprite.Sprite):
+#     def __init__(self, x, y, image):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.image = pygame.image.load(f"stars/{image}")
+#         self.size = random.randint(10, 50)
+#         self.image = pygame.transform.scale(self.image, (self.size, self.size))
+#         self.rect = self.image.get_rect()
+#         self.rect.bottom = y
+#         self.rect.centerx = x
+#         all_sprites.add(self)
+#
+#
+# def generatebg():
+#     for image in os.listdir('backgrounds'):
+#         Planet(random.randint(100, 1100), random.randint(100, 800), image)
+
+class BackGround(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(f"backgrounds/{random.choice(os.listdir('backgrounds'))}")
+        self.rect = self.image.get_rect()
+        self.rect.y = 0
+        self.rect.x = 0
+        all_sprites.add(self)
+
+
 def launchgame():
-    global all_sprites, fps, s, height, width, enemies, tempbullets, money
+    global screen, all_sprites, fps, s, height, width, enemies, tempbullets, money, planet_name
     money = 0
     tempbullets = []
     pygame.init()
@@ -202,9 +241,10 @@ def launchgame():
     all_sprites = pygame.sprite.Group()
     enemies = list()
     spots = []
+    BackGround()
     with open('data.json', 'r+') as file:
         data = json.load(file)
-        s = Spaceship(600, 700, 40, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
+        s = Spaceship(600, 700, 80, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
                       data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'])
         ammo = str(data['upgrades']['ammo'])
         max_ammo = '/' + str(data['upgrades']['ammo'])
@@ -229,6 +269,7 @@ def launchgame():
     t = time.time()
     pygame.display.flip()
     c = pygame.time.Clock()
+    over = False
     moves = {
         'down': False,
         'up': False,
@@ -239,101 +280,110 @@ def launchgame():
 
     col = (255, 255, 255)
     r = 3
-    while running:
-        pygame.display.flip()
-        if len(enemies) == 0 or s.hp <= 0:
-            with open('data.json', 'r+') as file:
-                data = json.load(file)
-                data['money'] = data['money'] + money
-                if s.hp > 0:
-                    data['progress'] = data['progress'] + 1
-                    if data['progress'] > data['maxprogress']:
-                        data['maxprogress'] = data['progress']
-                file.seek(0)
-                json.dump(data, file, indent=4)
-                file.truncate()
-            running = False
+    lose = True
+    try:
+        while running:
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    moves['up'] = True
-                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    moves['down'] = True
-                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    moves['left'] = True
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    moves['right'] = True
-                elif event.key == pygame.K_f:
-                    moves['shoot'] = True
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    moves['up'] = False
-                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    moves['down'] = False
-                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    moves['left'] = False
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    moves['right'] = False
-                elif event.key == pygame.K_f:
-                    moves['shoot'] = False
-        screen.fill('black')
-        if time.time() - t >= s.firerate:
-            if s.firerate == r:
-                ammo = max_ammo[1:]
-                col = (255, 255, 255)
-                s.firerate = data['upgrades']['fire rate']
-        if time.time() - t >= s.firerate and moves['shoot']:
-            t = time.time()
-            s.fire()
-            ammo = str(int(ammo) - 1)
-            if int(ammo) >= int(max_ammo[1:]) // 4:
-                col = (255, 255, 255)
-                s.firerate = data['upgrades']['fire rate']
-            else:
-                s.firerate = data['upgrades']['fire rate']
-                col = (255, 0, 0)
-            if int(ammo) == 0:
-                s.firerate = r
-        if moves['up']:
-            s.go_up()
-        if moves['down']:
-            s.go_down()
-        if moves['left']:
-            s.go_left()
-        if moves['right']:
-            s.go_right()
-        for e in enemies:
-            if time.time() - e.e_t >= e.firerate:
-                e.e_t = time.time()
-                e.fire()
-            e.show()
-            for elem in e.bullets:
+            if over:
+                game_over.gameover(screen, lose)
+            if len(enemies) == 0 or s.hp <= 0:
+                with open('data.json', 'r+') as file:
+                    data = json.load(file)
+                    data['money'] = data['money'] + money
+                    if s.hp > 0:
+                        lose = False
+                        data['progress'] = data['progress'] + 1
+                        if data['progress'] > data['maxprogress']:
+                            data['maxprogress'] = data['progress']
+                    file.seek(0)
+                    json.dump(data, file, indent=4)
+                    file.truncate()
+                over = True
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.quit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP or event.key == pygame.K_w:
+                        moves['up'] = True
+                    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                        moves['down'] = True
+                    elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                        moves['left'] = True
+                    elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                        moves['right'] = True
+                    elif event.key == pygame.K_f:
+                        moves['shoot'] = True
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_UP or event.key == pygame.K_w:
+                        moves['up'] = False
+                    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                        moves['down'] = False
+                    elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                        moves['left'] = False
+                    elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                        moves['right'] = False
+                    elif event.key == pygame.K_f:
+                        moves['shoot'] = False
+            screen.fill('black')
+            if time.time() - t >= s.firerate:
+                if s.firerate == r:
+                    ammo = max_ammo[1:]
+                    col = (255, 255, 255)
+                    s.firerate = data['upgrades']['fire rate']
+            if time.time() - t >= s.firerate and moves['shoot']:
+                t = time.time()
+                s.fire()
+                ammo = str(int(ammo) - 1)
+                if int(ammo) >= int(max_ammo[1:]) // 4:
+                    col = (255, 255, 255)
+                    s.firerate = data['upgrades']['fire rate']
+                else:
+                    s.firerate = data['upgrades']['fire rate']
+                    col = (255, 0, 0)
+                if int(ammo) == 0:
+                    s.firerate = r
+            if moves['up']:
+                s.go_up()
+            if moves['down']:
+                s.go_down()
+            if moves['left']:
+                s.go_left()
+            if moves['right']:
+                s.go_right()
+            for e in enemies:
+                if time.time() - e.e_t >= e.firerate:
+                    e.e_t = time.time()
+                    e.fire()
+                e.show()
+                for elem in e.bullets:
+                    if elem.life is False:
+                        e.bullets.remove(elem)
+                        all_sprites.remove(elem)
+                    else:
+                        elem.show()
+            s.show()
+            all_sprites.draw(screen)
+            for bullet in tempbullets:
+                bullet.show()
+            for elem in s.bullets:
                 if elem.life is False:
-                    e.bullets.remove(elem)
+                    s.bullets.remove(elem)
                     all_sprites.remove(elem)
                 else:
                     elem.show()
-        s.show()
-        all_sprites.draw(screen)
-        for bullet in tempbullets:
-            bullet.show()
-        for elem in s.bullets:
-            if elem.life is False:
-                s.bullets.remove(elem)
-                all_sprites.remove(elem)
-            else:
-                elem.show()
-        pygame.font.init()
-        font = pygame.font.SysFont('Arial', 50)
-        txt = font.render(ammo + max_ammo, False, col)
-        screen.blit(txt, (50, 800))
-        font1 = pygame.font.SysFont('Arial', 33)
-        txt = font1.render(str(money), False, 'yellow')
-        screen.blit(txt, (1125, 10))
-        c.tick(fps)
-        pygame.display.flip()
-    pygame.quit()
-    game_over.gameover()
+            pygame.font.init()
+
+            font = pygame.font.SysFont('Arial', 50)
+            txt = font.render(ammo + max_ammo, False, col)
+            screen.blit(txt, (50, 800))
+            font1 = pygame.font.SysFont('Arial', 33)
+            txt = font1.render(str(money), False, 'yellow')
+            screen.blit(txt, (1125, 10))
+            c.tick(fps)
+            pygame.display.flip()
+    except Exception as e:
+        print(e)
+
+
+launchgame()

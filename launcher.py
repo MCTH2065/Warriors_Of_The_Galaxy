@@ -27,7 +27,7 @@ class Main(QDialog):
         self.ammoup.clicked.connect(self.upgradeammo)
         self.hpup.clicked.connect(self.upgradehp)
         self.start.clicked.connect(self.launch)
-        self.movie = QMovie("bg2.gif")
+        self.movie = QMovie("laucher_background.gif")
         self.movie.frameChanged.connect(self.repaint)
         self.movie.start()
         self.setlevel.setMinimum(0)

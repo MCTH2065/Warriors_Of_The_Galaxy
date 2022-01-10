@@ -29,10 +29,10 @@ def connect(p1: Particle, p2: Particle):
     if dist < ran:
         pygame.draw.line(screen, (255 * (1 - dist / ran), 255 * (1 - dist / ran), 255 * (1 - dist / ran)), (p1.x, p1.y), (p2.x, p2.y), width=3)
 
-def gameover():
+def gameover(scr, islose):
     global screen
-    pygame.init()
-    pygame.display.set_caption('Движущийся круг 2')
+    screen = scr
+    pygame.display.set_caption('Game Over')
     size = width, height = 1200, 900
     screen = pygame.display.set_mode(size)
     particles = list()
@@ -41,8 +41,7 @@ def gameover():
                                   random.randint(-100, 100) / 50, random.randint(-100, 100) / 50,
                                   5,
                                   # (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255),
-                                  (255, 0, 0
-                                   )))
+                                  'red' if islose else 'green'))
     running = True
     clock = pygame.time.Clock()
     s = 0
@@ -57,8 +56,8 @@ def gameover():
                                   random.randint(-100, 100) / 50, random.randint(-100, 100) / 50,
                                   5,
                                   # (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255),
-                                  (255, 0, 0
-                                   )))
+                                  'red' if islose else 'green'
+                                          ))
         s += 1
         screen.fill((0, 0, 0))
         for i in particles:
@@ -67,8 +66,11 @@ def gameover():
             for j in particles:
                 connect(i, j)
         font = pygame.font.Font('./fonts/Blox2.ttf', 200)
-        txt = font.render('Game Over', False, 'red')
-        screen.blit(txt, (150, 300))
+        game_over = font.render('Game Over', False, 'red' if islose else 'green')
+        font = pygame.font.Font('./fonts/Blox2.ttf', 50)
+        iswin = font.render(f'You {"Lost" if islose else "Win" }', False, 'red' if islose else 'green')
+        screen.blit(game_over, (150, 300))
+        screen.blit(iswin, (500, 550))
         clock.tick(100)
         pygame.display.flip()
     pygame.quit()
