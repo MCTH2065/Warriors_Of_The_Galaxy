@@ -6,7 +6,7 @@ import time
 import json
 import ast
 
-import game_over
+from game_over import *
 
 
 class Spaceship(pygame.sprite.Sprite):
@@ -335,9 +335,10 @@ def launchgame():
         s = Spaceship(600, 700, 80, 'gogogo', data['upgrades']['speed'], data['upgrades']['bullet speed'],
                       data['upgrades']['fire rate'], data['upgrades']['damage'], data['upgrades']['hp'])
         ammo = str(data['upgrades']['ammo'])
-        max_ammo = '/' + str(data['upgrades']['ammo'])
+        max_ammo = str(data['upgrades']['ammo'])
         waves = data['progress'] // 2 + 1
         n = data['progress']
+        maxhp = data['upgrades']['hp']
     with open('enemies.txt', 'r+') as e: #json not used cause we need max score for data
         ene = ast.literal_eval(e.read())
         enemy_type = ene[data["level"]]
@@ -347,7 +348,6 @@ def launchgame():
     t = time.time()
     pygame.display.flip()
     c = pygame.time.Clock()
-    over = False
     moves = {
         'down': False,
         'up': False,
@@ -361,14 +361,14 @@ def launchgame():
     reset_time = time.time()
     lose = True
     #first wave of enemies spawn
-    spawn(n // 2, enemy_type)
+    spawn(n // 2 + 1, enemy_type)
     current_wave = 1
+    isreloading = False
     try:
         while running:
-            if over:
-                game_over.gameover(screen, lose)
             if s.hp <= 0 or len(enemies) == 0:
-                if waves == current_wave:
+                #this triggers when player clears the wave
+                if waves == current_wave or s.hp <= 0:
                     #game end
                     with open('data.json', 'r+') as file:
                         data = json.load(file)
@@ -381,13 +381,13 @@ def launchgame():
                         file.seek(0)
                         json.dump(data, file, indent=4)
                         file.truncate()
-                    over = True
+                    gameover(screen, lose)
                 else:
                     #new wave creation
                     if wave_cleared is False:
                         wave_cleared = True
                         reset_time = time.time()
-                    if wave_cleared and time.time() - reset_time >= 2:
+                    if wave_cleared and time.time() - reset_time >= 5:
                         current_wave += 1
                         if current_wave == 2:
                             spawn(n, enemy_type)
@@ -396,7 +396,7 @@ def launchgame():
                                 #here we creates boss each 5 levels
                                 spawn(n, enemy_type)
                                 if n % 5 == 0:
-                                    boss = Boss(500, 10000, 500, "spaceships/boss.png", 'first', n)
+                                    boss = Boss(n, n * 3, 500, "spaceships/boss.png", 'first', n)
                                     enemies.append(boss)
                             else:
                                 spawn(n + 1, enemy_type)
@@ -428,9 +428,15 @@ def launchgame():
                         moves['right'] = False
                     elif event.key == pygame.K_f:
                         moves['shoot'] = False
+                    elif event.key == pygame.K_r:
+                        if ammo != max_ammo:
+                            s.firerate = r
+                            isreloading = True
             if time.time() - t >= s.firerate:
+                #here is how main spaceship looses an ammo
                 if s.firerate == r:
-                    ammo = max_ammo[1:]
+                    isreloading = False
+                    ammo = max_ammo
                     col = (255, 255, 255)
                     s.firerate = data['upgrades']['fire rate']
             if time.time() - t >= s.firerate and moves['shoot']:
@@ -438,7 +444,7 @@ def launchgame():
                 t = time.time()
                 s.fire()
                 ammo = str(int(ammo) - 1)
-                if int(ammo) >= int(max_ammo[1:]) // 4:
+                if int(ammo) >= int(max_ammo) // 4:
                     col = (255, 255, 255)
                     s.firerate = data['upgrades']['fire rate']
                 else:
@@ -446,6 +452,7 @@ def launchgame():
                     col = (255, 0, 0)
                 if int(ammo) == 0:
                     s.firerate = r
+                    isreloading = True
             if moves['up']:
                 s.go_up()
             if moves['down']:
@@ -479,11 +486,22 @@ def launchgame():
                     elem.show()
             #here we displays data in the screen
             pygame.font.init()
-            font = pygame.font.SysFont('Arial', 50)
-            txt = font.render(ammo + max_ammo, False, col)
+            font = pygame.font.Font('fonts/Blox2.ttf', 50)
+            txt = font.render(tobloxfonttype(ammo + ' of ' + max_ammo), False, col if not isreloading else 'red')
             screen.blit(txt, (50, 800))
-            font1 = pygame.font.SysFont('Arial', 33)
-            txt = font1.render(str(money), False, 'yellow')
+            txt = font.render(tobloxfonttype(str(s.hp)), False, (255 - round(255 * s.hp / maxhp), round(255 * s.hp / maxhp), 0))
+            screen.blit(txt, (750, 800))
+            if isreloading:
+                txt = font.render(tobloxfonttype('Reloading'), False, 'red')
+                screen.blit(txt, (10, 10))
+            if s.hp <= 0 or len(enemies) == 0:
+                txt = font.render(tobloxfonttype(f'Wave Cleared'), False, (0, 255, 0))
+                screen.blit(txt, (10, 100))
+                txt = font.render(tobloxfonttype(f'New Wave In {round(5 - time.time() + reset_time)} Seconds'),
+                                  False, (0, 255, 0))
+                screen.blit(txt, (10, 160))
+            font1 = pygame.font.Font('fonts/Blox2.ttf', 33)
+            txt = font1.render(tobloxfonttype(str(money)), False, 'yellow')
             screen.blit(txt, (1125, 10))
             c.tick(fps)
             pygame.display.flip()

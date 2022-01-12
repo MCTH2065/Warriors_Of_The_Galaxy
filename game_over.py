@@ -2,6 +2,11 @@ import pygame
 import math
 import random
 
+def tobloxfonttype(text: str):
+    res = ''.join([letter.upper() if idx % 2 == 0 else letter.lower() for idx, letter in enumerate(text)])
+    return res
+
+
 class Particle:
     """class of the floating circles on the screen"""
     def __init__(self, x, y, speedx, speedy, size, color):
@@ -37,7 +42,8 @@ def gameover(scr, islose):
     """function that triggers when player kills all of enemies or dies(in game)"""
     global screen
     screen = scr
-    pygame.display.set_caption('Game Over')
+    #just cool game over window title))
+    pygame.display.set_caption("Btw as you lose you don\'t deserve that cool game over window" if islose else 'Game Over')
     size = width, height = 1200, 900
     screen = pygame.display.set_mode(size)
     particles = list()
@@ -56,6 +62,9 @@ def gameover(scr, islose):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 """
                 to make this screen better and interesting we decided to add particle appearance on click
@@ -83,9 +92,9 @@ def gameover(scr, islose):
 
         #here is some beauty font rendering
         font = pygame.font.Font('./fonts/Blox2.ttf', 200)
-        game_over = font.render('Game Over', False, 'red' if islose else 'green')
+        game_over = font.render(tobloxfonttype('Game Over'), False, 'red' if islose else 'green')
         font = pygame.font.Font('./fonts/Blox2.ttf', 50)
-        iswin = font.render(f'You {"Lost" if islose else "Win" }', False, 'red' if islose else 'green')
+        iswin = font.render(tobloxfonttype(f'You {"Lost" if islose else "Win" }'), False, 'red' if islose else 'green')
         screen.blit(game_over, (150, 300))
         screen.blit(iswin, (500, 550))
         clock.tick(100)
