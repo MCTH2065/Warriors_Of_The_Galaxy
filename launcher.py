@@ -20,6 +20,8 @@ class Main(QDialog):
         super(Main, self).__init__()
         """simple pyqt setup"""
         uic.loadUi('./launcher.ui', self)
+        self.setFixedWidth(1200)
+        self.setFixedHeight(900)
         self.setlevel.setMinimum(0)
         self.setlevel.setMaximum(180)
         self.setlevel.setTickPosition(QSlider.TicksBelow)
