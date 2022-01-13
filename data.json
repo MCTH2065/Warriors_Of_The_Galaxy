@@ -8,8 +8,8 @@
         "speed": 30,
         "fire rate": 0.1,
         "damage": 5,
-        "hp": 1000000000,
-        "ammo": 1000000000
+        "hp": 999,
+        "ammo": 111
     },
     "prices": {
         "bullet speed": 1,

@@ -103,24 +103,8 @@ class EnemySpaceship(pygame.sprite.Sprite):
                              400, 'red', self, 'spaceships/testbul2.png'))
         self.side = not self.side
 
-    def collide(self):
-        """function triggers every time when enemies collides, reverses enemy speed direction"""
-        global width
-        for elem in enemies:
-            if elem != self and pygame.sprite.collide_mask(self, elem):
-                if elem == boss:
-                    pass
-                else:
-                    self.velx = -self.velx
-                    self.x += 3 * self.velx
-                    if self.x <= 0:
-                        self.x = 15
-                    elif self.x >= width - self.size:
-                        self.x = width - self.size
-
     def show(self):
-        """"""
-        self.collide()
+        """this function displays enemy spaceship on the screen and collides it with other spaceships"""
         self.rect.x = self.x
         self.rect.y = self.y
         self.x += self.velx
