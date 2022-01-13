@@ -34,7 +34,7 @@ class Spaceship(pygame.sprite.Sprite):
         self.firerate = firerate
         self.show()
 
-    #here is some movement moments, functions doesn't need explanation
+    # here is some movement moments, functions doesn't need explanation
     def go_up(self):
         global height
         if self.y >= height // 2:
@@ -104,7 +104,7 @@ class EnemySpaceship(pygame.sprite.Sprite):
         self.side = not self.side
 
     def show(self):
-        """this function displays enemy spaceship on the screen and collides it with other spaceships"""
+        """"""
         self.rect.x = self.x
         self.rect.y = self.y
         self.x += self.velx
@@ -117,6 +117,7 @@ class EnemySpaceship(pygame.sprite.Sprite):
 
 class Boss(pygame.sprite.Sprite):
     """boss object"""
+
     def __init__(self, damage, hp, rew, img, boss_type, enemies_number):
         super().__init__(all_sprites)
         self.image = pygame.transform.scale(pygame.image.load(img), (350, 150))
@@ -237,6 +238,7 @@ class Blaster(pygame.sprite.Sprite):
 
 class EnemyBlaster(pygame.sprite.Sprite):
     """here is the class of bullet that enemies shoots"""
+
     def __init__(self, x, y, vel, col, spaceship, image):
         super().__init__(all_sprites)
         self.temporary = False
@@ -268,29 +270,19 @@ class EnemyBlaster(pygame.sprite.Sprite):
             all_sprites.remove(self)
             s.hp -= self.spaceship.damage
 
-#here's the first background loading variant using sprites. Might be removed
-# class BackGround(pygame.sprite.Sprite):
-#     def __init__(self):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.image = pygame.image.load(f"backgrounds/{random.choice(os.listdir('backgrounds'))}")
-#         self.rect = self.image.get_rect()
-#         self.rect.y = 0
-#         self.rect.x = 0
-#         all_sprites.add(self)
-
 
 def spawn(n, enemy_type):
     """this function creates enemies"""
     global enemies, boss, all_sprites
     spots = []
     for _ in range(n):
-        #random position generation
+        # random position generation
         pos = [random.randint(10, 1100), random.randint(10, 380)]
         while pos in spots:
             pos = [random.randint(10, 1100), random.randint(10, 380)]
         spots.append(pos)
     for i in range(len(spots)):
-        #enemies themselves
+        # enemies themselves
         speedx, speedy = random.randint(-enemy_type["speed"], enemy_type["speed"]), random.randint(-enemy_type["speed"],
                                                                                                    enemy_type["speed"])
         enemies.append(EnemySpaceship(spots[i][0], spots[i][1], 75, speedx, speedy,
@@ -323,7 +315,7 @@ def launchgame():
         waves = data['progress'] // 2 + 1
         n = data['progress']
         maxhp = data['upgrades']['hp']
-    with open('enemies.txt', 'r+') as e: #json not used cause we need max score for data
+    with open('enemies.txt', 'r+') as e:  # json not used cause we need max score for data
         ene = ast.literal_eval(e.read())
         enemy_type = ene[data["level"]]
     # some basic parameters needed to manage spaceship and so on
@@ -344,16 +336,16 @@ def launchgame():
     r = 3
     reset_time = time.time()
     lose = True
-    #first wave of enemies spawn
+    # first wave of enemies spawn
     spawn(n // 2 + 1, enemy_type)
     current_wave = 1
     isreloading = False
     try:
         while running:
             if s.hp <= 0 or len(enemies) == 0:
-                #this triggers when player clears the wave
+                # this triggers when player clears the wave
                 if waves == current_wave or s.hp <= 0:
-                    #game end
+                    # game end
                     with open('data.json', 'r+') as file:
                         data = json.load(file)
                         data['money'] = data['money'] + money
@@ -367,7 +359,7 @@ def launchgame():
                         file.truncate()
                     gameover(screen, lose)
                 else:
-                    #new wave creation
+                    # new wave creation
                     if wave_cleared is False:
                         wave_cleared = True
                         reset_time = time.time()
@@ -377,7 +369,7 @@ def launchgame():
                             spawn(n, enemy_type)
                         else:
                             if current_wave == waves:
-                                #here we creates boss each 5 levels
+                                # here we creates boss each 5 levels
                                 spawn(n, enemy_type)
                                 if n % 5 == 0:
                                     boss = Boss(n, n * 3, 500, "spaceships/boss.png", 'first', n)
@@ -386,7 +378,7 @@ def launchgame():
                                 spawn(n + 1, enemy_type)
                         wave_cleared = False
             for event in pygame.event.get():
-                #some dummy events functions for spaceship
+                # some dummy events functions for spaceship
                 if event.type == pygame.QUIT:
                     running = False
                     pygame.quit()
@@ -417,14 +409,14 @@ def launchgame():
                             s.firerate = r
                             isreloading = True
             if time.time() - t >= s.firerate:
-                #here is how main spaceship looses an ammo
+                # here is how main spaceship looses an ammo
                 if s.firerate == r:
                     isreloading = False
                     ammo = max_ammo
                     col = (255, 255, 255)
                     s.firerate = data['upgrades']['fire rate']
             if time.time() - t >= s.firerate and moves['shoot']:
-                #here is how spaceship shoots
+                # here is how spaceship shoots
                 t = time.time()
                 s.fire()
                 ammo = str(int(ammo) - 1)
@@ -446,8 +438,8 @@ def launchgame():
             if moves['right']:
                 s.go_right()
             pygame.display.flip()
-            screen.blit(bg, (0, 0)) #filling screen with random background from backgrounds folder
-            for e in enemies: #that's how enemies shoots
+            screen.blit(bg, (0, 0))  # filling screen with random background from backgrounds folder
+            for e in enemies:  # that's how enemies shoots
                 if time.time() - e.e_t >= e.firerate:
                     e.e_t = time.time()
                     e.fire()
@@ -468,12 +460,15 @@ def launchgame():
                     all_sprites.remove(elem)
                 else:
                     elem.show()
-            #here we displays data in the screen
+            # here we display data in the screen
+            if s.hp <= 0:
+                s.hp = 0
             pygame.font.init()
             font = pygame.font.Font('fonts/Blox2.ttf', 50)
             txt = font.render(tobloxfonttype(ammo + ' of ' + max_ammo), False, col if not isreloading else 'red')
             screen.blit(txt, (50, 800))
-            txt = font.render(tobloxfonttype(str(s.hp)), False, (255 - round(255 * s.hp / maxhp), round(255 * s.hp / maxhp), 0))
+            txt = font.render(tobloxfonttype(str(s.hp)), False,
+                              (255 - round(255 * s.hp / maxhp), round(255 * s.hp / maxhp), 0))
             screen.blit(txt, (750, 800))
             if isreloading:
                 txt = font.render(tobloxfonttype('Reloading'), False, 'red')
@@ -490,4 +485,5 @@ def launchgame():
             c.tick(fps)
             pygame.display.flip()
     except Exception as e:
+        print(e)
         pass
