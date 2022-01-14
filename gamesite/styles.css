@@ -1,0 +1,85 @@
+* {
+    font-family: 'Varela Round', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    color: whitesmoke;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+header {
+    color: rgb(231, 202, 202);
+    font-size: 60px;
+    font-weight: bold;
+    text-align: center;
+    padding: 100px;
+    padding-top: 45vh;
+    height: 60vh;
+    background-image: url('bg.png');
+    background-attachment: fixed;
+}
+
+section {
+    z-index: -1;
+    position: relative;
+    background-color: black;
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+.section-avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 5px solid black;
+    margin-left: 60vw;
+    box-shadow: 1px 1px 10px 10px rgba(255, 100, 0, 0.5);
+    margin-top: 40vh;
+}
+
+.section-text {
+    width: 50vw;
+    font-size: 20px;
+    position: absolute;
+    padding-left: 5vh;
+    padding-top: 30vh;
+}
+svg {
+    position: absolute;
+    animation: kaboom 5s ease infinite;
+}
+
+.section-title {
+    position: absolute;
+    font-size: 40px;
+    width: 100%;
+    text-align: center;
+    padding-top: 17vh;
+}
+
+.bottom-svg{
+    bottom: 0;
+    width: 100%;
+    left: 0;
+    z-index: -1;
+}
+
+.list {
+    margin-left: 15vw;
+}
+
+@keyframes kaboom {
+    0% {
+        transform: scale(1.1);
+      }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1.1);
+      }
+  }
