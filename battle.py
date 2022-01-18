@@ -1,7 +1,4 @@
-import math
 import os
-import random
-import pygame
 import time
 import json
 import ast
@@ -485,5 +482,4 @@ def launchgame():
             c.tick(fps)
             pygame.display.flip()
     except Exception as e:
-        print(e)
         pass

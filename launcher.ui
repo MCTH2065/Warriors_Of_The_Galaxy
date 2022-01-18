@@ -19,7 +19,7 @@
    <cursorShape>CrossCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Launcher</string>
   </property>
   <property name="styleSheet">
    <string notr="true">color: rgb(153, 149, 255);</string>

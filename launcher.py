@@ -101,13 +101,16 @@ class Main(QDialog):
                 if self.data['money'] < self.data['prices'][stat]:
                     self.showalert('No money', 'You need more money to upgrade speed')
                     return
-                self.data['upgrades'][stat] = self.data['upgrades'][stat] + 1
+                if stat == 'fire rate':
+                    self.data['upgrades'][stat] = self.data['upgrades'][stat] - 0.01
+                else:
+                    self.data['upgrades'][stat] = self.data['upgrades'][stat] + 1
                 self.data['money'] = self.data['money'] - self.data['prices'][stat]
                 self.data['prices'][stat] = self.data['prices'][stat] + 1
                 file.seek(0)
                 json.dump(self.data, file, indent=4)
                 file.truncate()
-            text_field.setText('Price: ' + str(self.data['prices'][stat]))
+            self.remake()
         except Exception as e:
             print(e)
 
