@@ -1,21 +1,21 @@
 {
-    "progress": 1,
-    "maxprogress": 1,
-    "money": 1,
-    "level": "easy",
+    "progress": 16,
+    "maxprogress": 16,
+    "money": 33028,
+    "level": "hard",
     "upgrades": {
-        "bullet speed": 400,
-        "speed": 10,
-        "fire rate": 0.5,
-        "damage": 1,
-        "hp": 10,
-        "ammo": 10
+        "bullet speed": 600,
+        "speed": 20,
+        "fire rate": 0.2,
+        "damage": 1029,
+        "hp": 10000,
+        "ammo": 10000
     },
     "prices": {
         "bullet speed": 1,
         "speed": 1,
         "fire rate": 1,
-        "damage": 1,
+        "damage": 30,
         "hp": 1,
         "ammo": 1
     }

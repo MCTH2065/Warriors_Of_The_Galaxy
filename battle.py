@@ -302,6 +302,9 @@ def launchgame():
     pygame.display.set_caption('Warriors Of The Galaxy')
     all_sprites = pygame.sprite.Group()
     enemies = list()
+    pygame.mixer.init()
+    sound = pygame.mixer.Sound('shoot.mp3')
+    sound.set_volume(0.2)
     # here we extract progress and spaceships stats
     with open('data.json', 'r+') as file:
         data = json.load(file)
@@ -413,6 +416,7 @@ def launchgame():
                     col = (255, 255, 255)
                     s.firerate = data['upgrades']['fire rate']
             if time.time() - t >= s.firerate and moves['shoot']:
+                sound.play()
                 # here is how spaceship shoots
                 t = time.time()
                 s.fire()
