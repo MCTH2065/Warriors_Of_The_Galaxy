@@ -1,6 +1,6 @@
-import pygame
-import math
-import random
+import pygame  # needs to manage user interface
+import math  # needs to calculate distance between particles
+import random  # needs for particle randomisation
 
 
 def tobloxfonttype(text: str):
@@ -12,6 +12,12 @@ class Particle:
     """class of the floating circles on the screen"""
 
     def __init__(self, x, y, speedx, speedy, size, color):
+        # x - start abscissa position
+        # y - start y-axis position
+        # speedx - abscissa particle speed
+        # speedy - y-axis particle speed
+        # size - size of particle
+        # color - particle color
         self.x = x
         self.y = y
         self.speedx = speedx
@@ -27,6 +33,7 @@ class Particle:
         """that's how circles moves"""
         self.x += self.speedx
         self.y += self.speedy
+        # border ricochet reproducing
         if self.x >= 1200 or self.x <= 0:
             self.speedx = -self.speedx
         if self.y >= 900 or self.y <= 0:
@@ -35,8 +42,8 @@ class Particle:
 
 def connect(p1: Particle, p2: Particle):
     """connects two particles with a line"""
-    dist = math.sqrt(abs(p1.x - p2.x) ** 2 + abs(p1.y - p2.y) ** 2)
-    ran = 100
+    dist = math.sqrt(abs(p1.x - p2.x) ** 2 + abs(p1.y - p2.y) ** 2)  # calculating distance between particles
+    ran = 100  # setting up distance on which particles would coneect
     if dist < ran:
         pygame.draw.line(screen, (255 * (1 - dist / ran), 255 * (1 - dist / ran), 255 * (1 - dist / ran)), (p1.x, p1.y),
                          (p2.x, p2.y), width=3)
@@ -99,8 +106,8 @@ def gameover(scr, islose):
         game_over = font.render(tobloxfonttype('Game Over'), False, 'red' if islose else 'green')
         font = pygame.font.Font('./fonts/Blox2.ttf', 50)
         iswin = font.render(tobloxfonttype(f'You {"Lost" if islose else "Win"}'), False, 'red' if islose else 'green')
-        screen.blit(game_over, (150, 300))
-        screen.blit(iswin, (500, 550))
+        screen.blit(game_over, (150, 300))  # 'game over' text rendering
+        screen.blit(iswin, (500, 550))  # information why game is over rendering
         clock.tick()
-        pygame.display.flip()
+        pygame.display.flip()  # new frame
     pygame.quit()
