@@ -339,7 +339,7 @@ def launchgame():
     enemies = list()  # list of all enemies
     pygame.mixer.init()  # here we creates mixer that will be used while spaceship is shooting
     sound = pygame.mixer.Sound('shoot.mp3')
-    sound.set_volume(0.2)
+    sound.set_volume(0.01)
     # here we extract progress and spaceships stats
     with open('data.json', 'r+') as file:
         # main spaceship creation using data from data.json

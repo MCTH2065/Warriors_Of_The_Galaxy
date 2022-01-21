@@ -28,17 +28,17 @@ class Main(QDialog):
         self.editlevel.clicked.connect(self.changelevel)
         # this function is used to render text on the launcher
         self.remake()
-        self.speedup.clicked.connect(lambda: self.multiupgrade('speed', self.speedprice))
+        self.speedup.clicked.connect(lambda: self.multiupgrade('speed'))
         # connecting speed upgrade button to upgrade function
-        self.bulletspeedup.clicked.connect(lambda: self.multiupgrade('bullet speed', self.bulletspeedprice))
+        self.bulletspeedup.clicked.connect(lambda: self.multiupgrade('bullet speed'))
         # connecting bullet speed upgrade button to upgrade function
-        self.ratespeedup.clicked.connect(lambda: self.multiupgrade('fire rate', self.rateupgradeprice))
+        self.ratespeedup.clicked.connect(lambda: self.multiupgrade('fire rate'))
         # connecting fire rate button to upgrade function
-        self.damageup.clicked.connect(lambda: self.multiupgrade('damage', self.dmgprice))
+        self.damageup.clicked.connect(lambda: self.multiupgrade('damage'))
         # connecting damage upgrade button to upgrade function
-        self.ammoup.clicked.connect(lambda: self.multiupgrade('ammo', self.ammoprice))
+        self.ammoup.clicked.connect(lambda: self.multiupgrade('ammo'))
         # connecting hp upgrade button to upgrade function
-        self.hpup.clicked.connect(lambda: self.multiupgrade('hp', self.hpprice))
+        self.hpup.clicked.connect(lambda: self.multiupgrade('hp'))
         # connecting game start button to function that starts game
         self.start.clicked.connect(self.launch)
         # rendering beautiful launcher background

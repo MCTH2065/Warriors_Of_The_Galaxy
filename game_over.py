@@ -4,6 +4,7 @@ import random  # needs for particle randomisation
 
 
 def tobloxfonttype(text: str):
+    # this function is used to convert text into text that will displays good with main game font
     res = ''.join([letter.upper() if idx % 2 == 0 else letter.lower() for idx, letter in enumerate(text)])
     return res
 
